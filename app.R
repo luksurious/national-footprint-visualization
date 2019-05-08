@@ -12,6 +12,9 @@ library(plotly)
 library(googleVis)
 
 rawData <- read.csv("data/NFA 2018.csv")
+countryCodes <- read.csv("data/country-codes.csv", na.strings = "-----")
+countryCodes <- countryCodes[, c("alpha.2", "alpha.3")]
+rawData <- merge(rawData, countryCodes, by.x = "ISO.alpha.3.code", by.y = "alpha.3")
 
 totalBiocapPerCountry <- rawData[rawData$record == "BiocapTotGHA", ]
 
@@ -219,7 +222,7 @@ server <- function(input, output) {
      
      cur_data <- na.omit(cur_data)
      
-     gvisGeoChart(cur_data, locationvar = "country", colorvar = "crop_land")
+     gvisGeoChart(cur_data, locationvar = "alpha.2", colorvar = "crop_land")
    })
   
 }
