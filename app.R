@@ -9,6 +9,7 @@
 
 library(shiny)
 library(plotly)
+library(googleVis)
 
 rawData <- read.csv("data/NFA 2018.csv")
 
@@ -79,7 +80,9 @@ ui <- navbarPage("National Footprint Visualization",
                                splitLayout(cellWidths = c("50%", "50%"), 
                                            plotlyOutput("absoluteChange"), plotlyOutput("relativeChange"))
                              )),
-                    tabPanel("Distribution", br(), plotlyOutput("distribution"))
+                    tabPanel("Distribution", br(), plotlyOutput("distribution")),
+                    
+                    tabPanel("Map Test",  htmlOutput("gvis"))
         ), br()
       )
     )
@@ -208,6 +211,17 @@ server <- function(input, output) {
       layout(yaxis = list(title = "Relative change of biocapacity"),
              xaxis = list(title = "Type of biocapacity"))
    })
+   
+   output$gvis <- renderGvis({
+     
+     cur_data <- CapitaBiocapPerCountry
+     cur_data <- cur_data[cur_data$year == input$years[2], ]
+     
+     cur_data <- na.omit(cur_data)
+     
+     gvisGeoChart(cur_data, locationvar = "country", colorvar = "crop_land")
+   })
+  
 }
 
 # Run the application 
