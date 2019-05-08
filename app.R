@@ -12,6 +12,20 @@ rawData <- merge(rawData, countryCodes, by.x = "ISO.alpha.3.code", by.y = "alpha
                   sort = FALSE, all.x = TRUE)
 rawData <- rawData[order(rawData$country, rawData$year, rawData$record), ]
 
+
+# Do some pre-filtering for the biocapacity
+totalBiocapPerCountry <- rawData[rawData$record == "BiocapTotGHA", ]
+CapitaBiocapPerCountry <- rawData[rawData$record == "BiocapPerCap", ]
+
+totalBiocapContinent <- aggregate(
+  cbind(crop_land, grazing_land, forest_land, fishing_ground, built_up_land, population, total) ~ year + UN_region,
+  totalBiocapPerCountry, sum)
+
+CapitaBiocapContinent <- aggregate(
+  cbind(crop_land, grazing_land, forest_land, fishing_ground, built_up_land, population, total) ~ year + UN_region,
+  CapitaBiocapPerCountry, sum)
+
+
 # UI Definition
 ui <- navbarPage("National Footprint Visualization",
                  
@@ -194,18 +208,6 @@ server <- function(input, output) {
   #####################
   # Biocapacity
   #####################
-  
-  # Do some pre-filtering for the biocapacity
-  totalBiocapPerCountry <- rawData[rawData$record == "BiocapTotGHA", ]
-  CapitaBiocapPerCountry <- rawData[rawData$record == "BiocapPerCap", ]
-  
-  totalBiocapContinent <- aggregate(
-    cbind(crop_land, grazing_land, forest_land, fishing_ground, built_up_land, population, total) ~ year + UN_region,
-    totalBiocapPerCountry, sum)
-  
-  CapitaBiocapContinent <- aggregate(
-    cbind(crop_land, grazing_land, forest_land, fishing_ground, built_up_land, population, total) ~ year + UN_region,
-    CapitaBiocapPerCountry, sum)
   
   selectBiocapData <- function(regionType, country, region, dataType, years) {
     if (regionType == 'Countries') {
