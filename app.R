@@ -25,15 +25,14 @@ CapitaBiocapContinent <- aggregate(
   CapitaBiocapPerCountry, sum)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
-   
-   # Application title
-   titlePanel("National Footprint Visualization"),
-   
-   # Sidebar with a slider input for number of bins 
-   sidebarLayout(
+ui <- navbarPage("National Footprint Visualization",
+  tabPanel("Biocapacity", fluidPage(
+    
+    h2("Are there different trends in the evolution of the different biocapacity resources?"),
+    
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
       sidebarPanel(
-        helpText("Are there different trends in the evolution of the different resources visible?"),
         radioButtons("regionType", label = "Type of region", choices = c("Continents", "Countries"),
                      selected = "Continents"),
         conditionalPanel(
@@ -73,15 +72,19 @@ ui <- fluidPage(
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotlyOutput("plot"),
-         h4("Changes in the resource types over the selected period", align = "center"),
-         fluidRow(
-           splitLayout(cellWidths = c("50%", "50%"), 
-                       plotlyOutput("absoluteChange"), plotlyOutput("relativeChange"))
-         ),
-         plotlyOutput("distribution")
+        tabsetPanel(type = "tabs",
+                    tabPanel("Trend", br(), plotlyOutput("plot"),
+                             h4("Changes in the resource types over the selected period", align = "center"),
+                             fluidRow(
+                               splitLayout(cellWidths = c("50%", "50%"), 
+                                           plotlyOutput("absoluteChange"), plotlyOutput("relativeChange"))
+                             )),
+                    tabPanel("Distribution", br(), plotlyOutput("distribution"))
+        ), br()
       )
-   )
+    )
+  )),
+  tabPanel("...")
 )
 
 # Define server logic required to draw a histogram
