@@ -10,15 +10,19 @@
 library(shiny)
 library(plotly)
 
-data <- read.csv("data/NFA 2018.csv")
+rawData <- read.csv("data/NFA 2018.csv")
 
-totalBiocapPerCountry <- data[data$record == "BiocapTotGHA", ]
+totalBiocapPerCountry <- rawData[rawData$record == "BiocapTotGHA", ]
+
+CapitaBiocapPerCountry <- rawData[rawData$record == "BiocapPerCap", ]
 
 totalBiocapContinent <- aggregate(
   cbind(crop_land, grazing_land, forest_land, fishing_ground, built_up_land, population, total) ~ year + UN_region,
   totalBiocapPerCountry, sum)
 
-#totalBiocapWorld <- totalBiocapPerCountry[totalBiocapPerCountry$country == "World", ]
+CapitaBiocapContinent <- aggregate(
+  cbind(crop_land, grazing_land, forest_land, fishing_ground, built_up_land, population, total) ~ year + UN_region,
+  CapitaBiocapPerCountry, sum)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -30,15 +34,20 @@ ui <- fluidPage(
    sidebarLayout(
       sidebarPanel(
         helpText("Are there different trends in the evolution of the different resources visible?"),
-        
-        selectInput(
-          "region",
-          label = "Choose the region to show in the chart",
-          choices = append(levels(totalBiocapContinent$UN_region), c("Use country...")),
-          selected = "World"
+        radioButtons("regionType", label = "Type of region", choices = c("Continents", "Countries"),
+                     selected = "Continents"),
+        conditionalPanel(
+          condition = "input.regionType == 'Continents'",
+          
+          selectInput(
+            "region",
+            label = "Choose the region to show in the chart",
+            choices = levels(totalBiocapContinent$UN_region),
+            selected = "World"
+          )
         ),
         conditionalPanel(
-          condition = "input.region == 'Use country...'",
+          condition = "input.regionType == 'Countries'",
           
           selectInput(
             "country",
@@ -47,6 +56,10 @@ ui <- fluidPage(
             selected = "Spain"
           )
         ),
+        
+        radioButtons("dataType", label = "Type of data", choices = c("Per person", "Total"), 
+                     selected = "Per person"),
+        
         sliderInput("years",
                     "Years",
                     min(totalBiocapContinent$year),
@@ -61,10 +74,11 @@ ui <- fluidPage(
       # Show a plot of the generated distribution
       mainPanel(
          plotlyOutput("plot"),
-         #verbatimTextOutput("event"),
-         
-         plotlyOutput("absoluteChange"),
-         plotlyOutput("relativeChange"),
+         h4("Changes in the resource types over the selected period", align = "center"),
+         fluidRow(
+           splitLayout(cellWidths = c("50%", "50%"), 
+                       plotlyOutput("absoluteChange"), plotlyOutput("relativeChange"))
+         ),
          plotlyOutput("distribution")
       )
    )
@@ -74,15 +88,35 @@ ui <- fluidPage(
 server <- function(input, output) {
   
   curData <- reactive({
-    if (input$region == 'Use country...') {
-      totalBiocapPerCountry[totalBiocapPerCountry$country == input$country
-                           & totalBiocapPerCountry$year >= input$years[1]
-                           & totalBiocapPerCountry$year <= input$years[2], ]
+    if (input$regionType == 'Countries') {
+      
+      if (input$dataType == 'Per person') {
+        data <- CapitaBiocapPerCountry[CapitaBiocapPerCountry$country == input$country
+                                      & CapitaBiocapPerCountry$year >= input$years[1]
+                                      & CapitaBiocapPerCountry$year <= input$years[2], ]
+      } else {
+        data <- totalBiocapPerCountry[totalBiocapPerCountry$country == input$country
+                                      & totalBiocapPerCountry$year >= input$years[1]
+                                      & totalBiocapPerCountry$year <= input$years[2], ]
+      }
     } else {
-      totalBiocapContinent[totalBiocapContinent$UN_region == input$region
+      data <- totalBiocapContinent[totalBiocapContinent$UN_region == input$region
                            & totalBiocapContinent$year >= input$years[1]
                            & totalBiocapContinent$year <= input$years[2], ]
+      
+      # per continent data per capita is not provided, we need to roughly calculate it
+      # because of the large numbers, the precision is not perfect
+      if (input$dataType == 'Per person') {
+        data$crop_land <- data$crop_land / data$population
+        data$grazing_land = data$grazing_land / data$population
+        data$forest_land = data$forest_land / data$population
+        data$fishing_ground = data$fishing_ground / data$population
+        data$built_up_land = data$built_up_land / data$population
+        data$total = data$total / data$population
+      }
     }
+    
+    data
   })  
    
    output$plot <- renderPlotly({
@@ -102,9 +136,8 @@ server <- function(input, output) {
      p
    })
    
-   output$event <- renderPrint({
-     d <- event_data("plotly_hover")
-     if (is.null(d)) "Hover on a point!" else d
+   output$changeTitle <- renderText({
+     "Changes in the resource types over the selected period"
    })
    
    output$distribution <- renderPlotly({
@@ -112,13 +145,13 @@ server <- function(input, output) {
       #                                & totalBiocapContinent$year >= input$years[1]
        #                               & totalBiocapContinent$year <= input$years[2], ]
      
-     plot_ly(curData(), x = ~crop_land, name = "crop land", type = "box") %>%
-       add_trace(x = ~forest_land, name = "forest land") %>%
-       add_trace(x = ~grazing_land, name = "grazing land") %>%
-       add_trace(x = ~fishing_ground, name = "fishing ground") %>%
-       add_trace(x = ~built_up_land, name = "built up land") %>%
+     plot_ly(curData(), x = ~grazing_land, name = "Grazing land", type = "box") %>%
+       add_trace(x = ~forest_land, name = "Forest land") %>%
+       add_trace(x = ~fishing_ground, name = "Fishing ground") %>%
+       add_trace(x = ~crop_land, name = "Crop land") %>%
+       add_trace(x = ~built_up_land, name = "Built-up land") %>%
        layout(xaxis = list(title = "Biocapacity in global hectares"), 
-              title = "Variance of data for the range")
+              title = "Comparison of data ranges for the different resource types")
    })
    
    changeData <- reactive({
@@ -148,10 +181,18 @@ server <- function(input, output) {
    output$absoluteChange <- renderPlotly({
      data <- changeData()
      text <- sprintf("%.0f", data$absolute)
-     text <- paste(formatC(data$absolute/1000000, format = "f", big.mark = ",", digits = 2, flag = '+'), "M")
+     if (input$dataType == 'Per person') {
+       factor <- 1
+       suffix <- ""
+     } else {
+       factor <- 1000000
+       suffix <- "M"
+     }
+     
+     text <- paste(formatC(data$absolute/factor, format = "f", big.mark = ",", digits = 2, flag = '+'), suffix)
      plot_ly(data, x = ~type, y = ~absolute, type = 'bar', text = text, textposition = 'auto'
              ) %>%
-       layout(yaxis = list(title = "Absolute change of biocapacity"),
+       layout(yaxis = list(title = "Absolute change of biocapacity in GHA"),
               xaxis = list(title = "Type of biocapacity"))
    })
    output$relativeChange <- renderPlotly({
