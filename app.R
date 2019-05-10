@@ -7,7 +7,8 @@ source("./biocapacity-data.R", local = TRUE)
 # Load modules
 source("./biocapacity-trend.R", local = TRUE)
 source("./biocapacity-comparison.R", local = TRUE)
-source("./biocapacity-map.R", local = TRUE)
+
+source("./map.R", local = TRUE)
 
 source("./carbon.R", local = TRUE)
 
@@ -26,7 +27,7 @@ ui <- navbarPage("National Footprint Visualization",
       #####################
       tabPanel("Trend",
        br(),
-       biocapacityTrendUI("bcTrend", totalBiocapPerCountry)
+       biocapacityTrendUI("bcTrend")
       ),
   
       #####################
@@ -34,21 +35,16 @@ ui <- navbarPage("National Footprint Visualization",
       #####################
       tabPanel("Comparison", 
        br(),
-       biocapacityComparisonUI("bcComp", totalBiocapPerCountry)
-      ),
-    
-      #####################
-      # Spatial comparison
-      #####################
-      tabPanel("Spatial comparison", 
-        br(),
-        biocapacityMapUI("bcMap", totalBiocapPerCountry)
+       biocapacityComparisonUI("bcComp")
       )
     ),
     br()
   )),
   tabPanel("Carbon emissions",
     carbonEmissionsUI("carbon")
+  ),
+  tabPanel("Map",
+    mapVisualizationUI("map")
   ),
   tabPanel("...")
 )
@@ -64,15 +60,17 @@ server <- function(input, output) {
   
   # Biocapacity comparison
   callModule(biocapacityComparison, "bcComp", selectBiocapData)
-   
-  # Spatial comparison
-  callModule(biocapacityMap, "bcMap")
   
   
   #####################
   # Carbon Emissions
   #####################
   callModule(carbonEmissions, "carbon")
+  
+  #####################
+  # Map Visualization
+  #####################
+  callModule(mapVisualization, "map")
   
 }
 

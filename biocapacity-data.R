@@ -1,8 +1,7 @@
 
 # Do some pre-filtering for the biocapacity
 totalBiocapPerCountry <- rawData[rawData$record == "BiocapTotGHA",]
-capitaBiocapPerCountry <-
-  rawData[rawData$record == "BiocapPerCap",]
+capitaBiocapPerCountry <- rawData[rawData$record == "BiocapPerCap",]
 
 totalBiocapContinent <- aggregate(
   cbind(

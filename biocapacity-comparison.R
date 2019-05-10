@@ -1,6 +1,6 @@
 library(plotly)
 
-biocapacityComparisonUI <- function (id, biocapData) {
+biocapacityComparisonUI <- function (id) {
   ns <- NS(id)
   
   tagList(
@@ -20,13 +20,13 @@ biocapacityComparisonUI <- function (id, biocapData) {
           selectInput(
             ns("region1"),
             label = "Choose the first region to show in the chart",
-            choices = levels(biocapData$UN_region),
+            choices = dataRegions,
             selected = "Europe"
           ),
           selectInput(
             ns("region2"),
             label = "Choose the first region to show in the chart",
-            choices = levels(biocapData$UN_region),
+            choices = dataRegions,
             selected = "Asia"
           )
         ),
@@ -36,13 +36,13 @@ biocapacityComparisonUI <- function (id, biocapData) {
           selectInput(
             ns("country1"),
             label = "Choose the first country to show in the chart",
-            choices = levels(biocapData$country),
+            choices = dataCountries,
             selected = "Spain"
           ),
           selectInput(
             ns("country2"),
             label = "Choose the country to show in the chart",
-            choices = levels(biocapData$country),
+            choices = dataCountries,
             selected = "Germany"
           )
         ),
@@ -71,11 +71,11 @@ biocapacityComparisonUI <- function (id, biocapData) {
         sliderInput(
           ns("years"),
           "Years",
-          min(biocapData$year),
-          max(biocapData$year),
+          dataYears[1],
+          dataYears[2],
           value = c(
-            max(biocapData$year) - 20,
-            max(biocapData$year)
+            dataYears[1] - 20,
+            dataYears[2]
           ),
           sep = "",
           step = 1
@@ -133,7 +133,7 @@ biocapacityComparison <- function (input, output, session, selectBiocapData) {
                 y = as.formula(sprintf("~ %s.y", input$resourceType)),
                 mode = 'lines') %>%
       layout(
-        title = sprintf("Biocapacity Evolution of a %s", input$resourceType),
+        title = sprintf("Biocapacity Evolution of %s", input$resourceType),
         xaxis = list(title = "Year"),
         yaxis = list (title = "Biocapacity in global hectares")
       )

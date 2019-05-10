@@ -25,6 +25,7 @@ element2 <- (
     summarise(total_mean = (mean(total)), carbon = mean(carbon))
 )
 
+
 mapData <- element1[element1$year == 2014 & element1$record == 'EFConsTotGHA', ]
 
 element3 = aggregate(cbind(carbon, population) ~ UN_region + year, element1, FUN =

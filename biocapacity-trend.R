@@ -1,11 +1,8 @@
 library(plotly)
 
 # Biocapacity trend
-biocapacityTrendUI <- function (id, data) {
+biocapacityTrendUI <- function (id) {
   ns <- NS(id)
-  
-  minYear <- min(data$year)
-  maxYear <- max(data$year)
   
   tagList(
     h2(
@@ -26,7 +23,7 @@ biocapacityTrendUI <- function (id, data) {
           selectInput(
             ns("region"),
             label = "Choose the region to show in the chart",
-            choices = levels(data$UN_region),
+            choices = dataRegions,
             selected = "World"
           )
         ),
@@ -36,7 +33,7 @@ biocapacityTrendUI <- function (id, data) {
           selectInput(
             ns("country"),
             label = "Choose the country to show in the chart",
-            choices = levels(data$country),
+            choices = dataCountries,
             selected = "Spain"
           )
         ),
@@ -51,11 +48,11 @@ biocapacityTrendUI <- function (id, data) {
         sliderInput(
           ns("years"),
           "Years",
-          minYear,
-          maxYear,
+          dataYears[1],
+          dataYears[2],
           value = c(
-            maxYear - 20,
-            maxYear
+            dataYears[2] - 20,
+            dataYears[2]
           ),
           sep = "",
           step = 1
@@ -129,7 +126,8 @@ biocapacityTrend <- function (input, output, session, selectBiocapData) {
   #########
   bioCapChangeData <- reactive({
     cur_data <- bioCapTrendData()
-    cur_data <- cur_data[cur_data$year == input$years[1] | cur_data$year == input$years[2], ]
+    #cur_data <- cur_data[cur_data$year == input$years[1] | cur_data$year == input$years[2], ]
+    cur_data <- cur_data[cur_data$year == min(cur_data$year) | cur_data$year == max(cur_data$year), ]
     
     crop_change <- cur_data$crop_land[2] - cur_data$crop_land[1]
     forest_change <- cur_data$forest_land[2] - cur_data$forest_land[1]
