@@ -1,4 +1,5 @@
-
+library(googleVis)
+library(plotly)
 
 biocapacityMapUI <- function (id, biocapData) {
   ns <- NS(id)
@@ -38,11 +39,15 @@ biocapacityMapUI <- function (id, biocapData) {
           value = max(biocapData$year),
           sep = "",
           step = 1,
-          animate = animationOptions(interval = 1000)
+          animate = animationOptions(interval = 300)
         )
       ),
       
-      mainPanel(htmlOutput(ns("gvis")))
+      mainPanel(
+        plotlyOutput(ns("map"))
+        #,
+        #htmlOutput(ns("gvis"))
+      )
     )
   )
 }
@@ -57,7 +62,7 @@ biocapacityMap <- function (input, output, session) {
     }
     cur_data <- cur_data[cur_data$year == input$year, ]
     
-    cur_data <- na.omit(cur_data)
+    #cur_data <- na.omit(cur_data)
     
     cur_data
   })
@@ -65,5 +70,26 @@ biocapacityMap <- function (input, output, session) {
   output$gvis <- renderGvis({
     gvisGeoChart(cur_data(), locationvar = "alpha.2", colorvar = input$resourceType,
                  options = list(width="100%", colorAxis = "{colors: ['#F5FDF5', '#267114']}"))
+  })
+  
+  output$map <- renderPlotly({
+    g <- list(
+      scope = 'world',
+      showframe = FALSE,
+      showcoastlines = TRUE,
+      coastlinecolor = toRGB("grey")
+    )
+    
+    l <- list(color = toRGB("grey"), width = 0.5)
+    
+    plot_geo(cur_data()) %>%
+      add_trace(
+        z = as.formula(paste0("~", input$resourceType)),
+        locations = ~ ISO.alpha.3.code,
+        color = as.formula(paste0("~", input$resourceType)),
+        colors = "Greens",
+        marker = list(line = l)
+      ) %>%
+      layout(title = '', geo = g)
   })
 }

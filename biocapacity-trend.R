@@ -1,6 +1,6 @@
+library(plotly)
+
 # Biocapacity trend
-
-
 biocapacityTrendUI <- function (id, data) {
   ns <- NS(id)
   

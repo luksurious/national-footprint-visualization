@@ -1,5 +1,4 @@
 
-
 # Do some pre-filtering for the biocapacity
 totalBiocapPerCountry <- rawData[rawData$record == "BiocapTotGHA",]
 capitaBiocapPerCountry <-

@@ -1,6 +1,4 @@
 library(shiny)
-library(plotly)
-library(googleVis)
 
 # Prepare data
 source("./load-data.R", local = TRUE)
@@ -11,6 +9,7 @@ source("./biocapacity-trend.R", local = TRUE)
 source("./biocapacity-comparison.R", local = TRUE)
 source("./biocapacity-map.R", local = TRUE)
 
+source("./carbon.R", local = TRUE)
 
 # UI Definition
 ui <- navbarPage("National Footprint Visualization",
@@ -48,6 +47,9 @@ ui <- navbarPage("National Footprint Visualization",
     ),
     br()
   )),
+  tabPanel("Carbon emissions",
+    carbonEmissionsUI("carbon")
+  ),
   tabPanel("...")
 )
 
@@ -66,6 +68,11 @@ server <- function(input, output) {
   # Spatial comparison
   callModule(biocapacityMap, "bcMap")
   
+  
+  #####################
+  # Carbon Emissions
+  #####################
+  callModule(carbonEmissions, "carbon")
   
 }
 

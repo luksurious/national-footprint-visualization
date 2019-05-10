@@ -1,4 +1,4 @@
-
+library(plotly)
 
 biocapacityComparisonUI <- function (id, biocapData) {
   ns <- NS(id)
