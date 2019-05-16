@@ -12,6 +12,8 @@ source("./map.R", local = TRUE)
 
 source("./carbon.R", local = TRUE)
 
+source("./gdp-vs-ef.R", local = TRUE)
+
 # UI Definition
 ui <- navbarPage("National Footprint Visualization",
                  
@@ -46,6 +48,9 @@ ui <- navbarPage("National Footprint Visualization",
   tabPanel("Map",
     mapVisualizationUI("map")
   ),
+  tabPanel("GDP vs Footprint",
+    gdpVsEFUI("gdpVsEf")
+  ),
   tabPanel("...")
 )
 
@@ -71,6 +76,12 @@ server <- function(input, output) {
   # Map Visualization
   #####################
   callModule(mapVisualization, "map")
+  
+  
+  #####################
+  # GDP vs Footprint Visualization
+  #####################
+  callModule(gdpVsEF, "gdpVsEf")
   
 }
 
