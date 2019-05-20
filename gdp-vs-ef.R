@@ -13,7 +13,7 @@ gdpVsEFUI <- function (id) {
           selected = "World"
         ),
         
-        radioButtons(ns("yearMode"), label = "Year or time range", choices = c("Year", "Time range")),
+        radioButtons(ns("yearMode"), label = "Year or time range", choices = c("Time range", "Year (only end of Range)"), selected = "Time range"),
         
         sliderInput(
           ns("years"),
@@ -66,16 +66,17 @@ gdpVsEF <- function (input, output, session) {
       
       
       
-      plot_ly(dataM, y = ~efPerc, x = ~gdpPerc, type = 'scatter', mode = 'markers', size = ~population.y,
+      plot_ly(dataM, y = ~efPerc, x = ~gdpPerc, type = 'scatter', mode = 'markers',
               text = ~paste(country, '<br>Footprint change:', efPerc, '%<br>GDP change:', gdpPerc, '%<br>Population:', population.y), hoverinfo = 'text',
               color = ~UN_region.y, marker = list(opacity = 0.7, sizemode = 'diameter'), sizes = c(5, 25)) %>%
-        layout(title = "GDP vs Footprint", yaxis = list(title = "Ecological Footprint change per Person in %"),
+        layout(title = "GDP vs Footprint", 
+               yaxis = list(title = "Ecological Footprint change per Person in %", scaleanchor = "x", scaleratio = 1),
                xaxis = list(title = "GDP change per Person in %")
         )
     } else {
       data <- na.omit(data)
       
-      plot_ly(data, y = ~total, x = ~Percapita.GDP..2010.USD., type = 'scatter', mode = 'markers', size = ~population,
+      plot_ly(data, y = ~total, x = ~Percapita.GDP..2010.USD., type = 'scatter', mode = 'markers',
               text = ~paste(country, '<br>Footprint:', total, '<br>GDP:', Percapita.GDP..2010.USD., '<br>Population: ', population), hoverinfo = 'text',
               color = ~UN_region, marker = list(opacity = 0.7, sizemode = 'diameter'), sizes = c(5, 25)) %>%
         layout(title = "GDP vs Footprint", yaxis = list(title = "Ecological Footprint per Person in GHA"),
