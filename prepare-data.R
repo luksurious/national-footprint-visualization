@@ -154,3 +154,50 @@ selectData <-
     
     return(data)
   }
+
+deficitData <- function (regionType, dataType) {
+  columns <- c("total", "year")
+  if (dataType == 'Total') {
+    if (regionType == 'Countries') {
+      footprint <- totalFootprintPerCountry
+      biocapacity <- totalBiocapPerCountry
+      
+      columns <- append(columns, c("country", "ISO.alpha.3.code"))
+      matchCol <- "country"
+    } else {
+      footprint <- totalFootprintContinent
+      biocapacity <- totalBiocapContinent
+      
+      columns <- append(columns, c("UN_region"))
+      matchCol <- "UN_region"
+    }
+  } else {
+    if (regionType == 'Countries') {
+      footprint <- capitaFootprintPerCountry
+      biocapacity <- capitaBiocapPerCountry
+      
+      columns <- append(columns, c("country", "ISO.alpha.3.code"))
+      matchCol <- "country"
+    } else {
+      footprint <- capitaFootprintContinent
+      biocapacity <- capitaBiocapContinent
+      
+      columns <- append(columns, c("UN_region"))
+      matchCol <- "UN_region"
+    }
+  }
+  
+  cur_data <- merge(footprint[, columns],
+                    biocapacity[, columns],
+                    by = c(matchCol, "year"))
+  cur_data <-
+    within(cur_data, diff <- total.y - total.x)
+  
+  cur_data <- cur_data[order(cur_data$year), ]
+  
+  #names(cur_data)[names(cur_data) == "UN_region"] <- "region"
+  #names(cur_data)[names(cur_data) == "country"] <- "region"
+  
+
+  return(cur_data)
+}

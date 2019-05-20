@@ -14,6 +14,8 @@ source("./carbon.R", local = TRUE)
 
 source("./gdp-vs-ef.R", local = TRUE)
 
+source("./deficit.R", local = TRUE)
+
 # UI Definition
 ui <- navbarPage("National Footprint Visualization",
                  
@@ -77,7 +79,9 @@ ui <- navbarPage("National Footprint Visualization",
   tabPanel("GDP vs Footprint",
     gdpVsEFUI("gdpVsEf")
   ),
-  tabPanel("...")
+  tabPanel("Ecological Deficit",
+    deficitTrendUI("deficit")
+  )
 )
 
 # Define server logic required to draw a histogram
@@ -117,6 +121,11 @@ server <- function(input, output) {
   # GDP vs Footprint Visualization
   #####################
   callModule(gdpVsEF, "gdpVsEf")
+  
+  #####################
+  # Deficit Visualization
+  #####################
+  callModule(deficitTrend, "deficit")
   
 }
 

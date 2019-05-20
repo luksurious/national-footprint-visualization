@@ -108,20 +108,12 @@ mapVisualization <- function (input, output, session) {
         }
       },
       "Ecological Deficit/Reserve" = {
-        if (input$dataType == 'Total') {
-          cur_data <- merge(totalFootprintPerCountry[totalFootprintPerCountry$year == input$year, c("ISO.alpha.3.code", "total")],
-                            totalBiocapPerCountry[totalBiocapPerCountry$year == input$year, c("ISO.alpha.3.code", "total")],
-                            by = "ISO.alpha.3.code")
-        } else {
-          cur_data <- merge(capitaFootprintPerCountry[capitaFootprintPerCountry$year == input$year, c("ISO.alpha.3.code", "total")],
-                            capitaBiocapPerCountry[capitaBiocapPerCountry$year == input$year, c("ISO.alpha.3.code", "total")],
-                            by = "ISO.alpha.3.code")
-        }
-        cur_data <-
-          cur_data[cur_data$ISO.alpha.3.code != "",]
+        cur_data <- deficitData("Countries", input$dataType)
         
         cur_data <-
-          within(cur_data, diff <- total.y - total.x)
+          cur_data[cur_data$year == input$year &
+                     cur_data$ISO.alpha.3.code.x != "",]
+        names(cur_data)[names(cur_data) == "ISO.alpha.3.code.x"] <- "ISO.alpha.3.code"
       }
     )
     
