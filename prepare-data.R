@@ -105,10 +105,27 @@ selectData <-
       }
       region <- country
     } else {
-      if (record == 'Biocap') {
-        data <- totalBiocapContinent
+      if (dataType == 'Per person') {
+        # only World has given data per capita, other regions must be calculated
+        if (region == 'World') {
+          if (record == 'Biocap') {
+            data <- capitaBiocapContinent
+          } else {
+            data <- capitaFootprintContinent
+          }
+        } else {
+          if (record == 'Biocap') {
+            data <- totalBiocapContinent
+          } else {
+            data <- totalFootprintContinent
+          }
+        }
       } else {
-        data <- totalFootprintContinent
+        if (record == 'Biocap') {
+          data <- totalBiocapContinent
+        } else {
+          data <- totalFootprintContinent
+        }
       }
     }
     
@@ -122,13 +139,17 @@ selectData <-
     
     # per continent data per capita is not provided, we need to roughly calculate it
     # because of the large numbers, the precision is not perfect
-    if (dataType == 'Per person' && regionType == 'Continents') {
+    if (dataType == 'Per person' && regionType == 'Continents' && region != 'World') {
       data$crop_land <- data$crop_land / data$population
       data$grazing_land = data$grazing_land / data$population
       data$forest_land = data$forest_land / data$population
       data$fishing_ground = data$fishing_ground / data$population
       data$built_up_land = data$built_up_land / data$population
       data$total = data$total / data$population
+      
+      if (record == 'Footprint') {
+        data$carbon = data$carbon / data$population
+      }
     }
     
     return(data)
