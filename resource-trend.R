@@ -1,12 +1,12 @@
 library(plotly)
 
-# Biocapacity trend
-biocapacityTrendUI <- function (id) {
+# Resource trend
+resourceTrendUI <- function (id, record) {
   ns <- NS(id)
   
   tagList(
     h2(
-      "Are there different trends in the evolution of the different biocapacity resources?"
+      paste0("Are there different trends in the evolution of the different ", record, " resources?")
     ),
     
     sidebarLayout(
@@ -74,17 +74,17 @@ biocapacityTrendUI <- function (id) {
   )
 }
 
-biocapacityTrend <- function (input, output, session, selectBiocapData) {
+resourceTrend <- function (input, output, session, selectResourceData, record) {
   
-  bioCapTrendData <- reactive({
-    selectBiocapData(input$regionType, input$country, input$region, input$dataType, input$years)
+  resourceTrendData <- reactive({
+    selectResourceData(input$regionType, input$country, input$region, input$dataType, input$years)
   })  
   
   
   output$plot <- renderPlotly({
     p <-
       plot_ly(
-        bioCapTrendData(),
+        resourceTrendData(),
         x = ~ year,
         name = 'crop land',
         y = ~ crop_land,
@@ -104,10 +104,19 @@ biocapacityTrend <- function (input, output, session, selectBiocapData) {
                 name = 'built up land',
                 mode = 'lines') %>%
       layout(
-        title = "Total Biocapacity Development",
+        title = paste0("Total ", record, " Development"),
         xaxis = list(title = "Year"),
-        yaxis = list (title = "Biocapacity in global hectares")
+        yaxis = list (title = paste0(record, " in global hectares"))
       )
+    
+    if (record == 'Footprint') {
+      p <- add_trace(
+        y = ~ carbon,
+        name = 'Carbon emissions',
+        mode = 'lines',
+        p = p
+      )
+    }
     
     if (input$show_total == TRUE) {
       p <- add_trace(
@@ -124,8 +133,8 @@ biocapacityTrend <- function (input, output, session, selectBiocapData) {
   #########
   # Biocapacity trend change
   #########
-  bioCapChangeData <- reactive({
-    cur_data <- bioCapTrendData()
+  resourceChangeData <- reactive({
+    cur_data <- resourceTrendData()
     #cur_data <- cur_data[cur_data$year == input$years[1] | cur_data$year == input$years[2], ]
     cur_data <- cur_data[cur_data$year == min(cur_data$year) | cur_data$year == max(cur_data$year), ]
     
@@ -134,6 +143,7 @@ biocapacityTrend <- function (input, output, session, selectBiocapData) {
     grazing_change <- cur_data$grazing_land[2] - cur_data$grazing_land[1]
     fishing_change <- cur_data$fishing_ground[2] - cur_data$fishing_ground[1]
     built_change <- cur_data$built_up_land[2] - cur_data$built_up_land[1]
+    
     
     crop_relative <- crop_change / cur_data$crop_land[1]
     forest_relative <- forest_change / cur_data$forest_land[1]
@@ -146,11 +156,20 @@ biocapacityTrend <- function (input, output, session, selectBiocapData) {
     relative <- c(crop_relative, forest_relative, grazing_relative, fishing_relative, built_relative)
     
     
+    if (record == 'Footprint') {
+      carbon_change <- cur_data$carbon[2] - cur_data$carbon[1]
+      carbon_relative <- carbon_change / cur_data$carbon[1]
+      
+      type <- append(type, c("Carbon"))
+      absolute <- append(absolute, c(carbon_change))
+      relative <- append(relative, c(carbon_relative))
+    }
+    
     data.frame(type, absolute, relative)
   })
   
   output$absoluteChange <- renderPlotly({
-    data <- bioCapChangeData()
+    data <- resourceChangeData()
     text <- sprintf("%.0f", data$absolute)
     if (input$dataType == 'Per person') {
       factor <- 1
@@ -163,18 +182,18 @@ biocapacityTrend <- function (input, output, session, selectBiocapData) {
     text <- paste(formatC(data$absolute/factor, format = "f", big.mark = ",", digits = 2, flag = '+'), suffix)
     plot_ly(data, x = ~type, y = ~absolute, type = 'bar', text = text, textposition = 'auto'
     ) %>%
-      layout(yaxis = list(title = "Absolute change of biocapacity in GHA"),
-             xaxis = list(title = "Type of biocapacity"))
+      layout(yaxis = list(title = paste0("Absolute change of ", record, " in GHA")),
+             xaxis = list(title = paste0("Type of ", record)))
   })
   output$relativeChange <- renderPlotly({
-    data <- bioCapChangeData()
+    data <- resourceChangeData()
     text <- paste(formatC(data$relative*100, format = "f", digits = 2, flag = '+'), "%")
     plot_ly(data, x = ~type, y = ~relative*100, type = 'bar', text = ~text,
             textposition = 'auto',
             marker = list(color = 'rgb(158,202,225)',
                           line = list(color = 'rgb(8,48,107)', width = 1.5))) %>%
-      layout(yaxis = list(title = "Relative change of biocapacity"),
-             xaxis = list(title = "Type of biocapacity"))
+      layout(yaxis = list(title = paste0("Relative change of ", record)),
+             xaxis = list(title = paste0("Type of ", record)))
   })
   
 }

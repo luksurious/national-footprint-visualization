@@ -1,10 +1,23 @@
 library(plotly)
 
-biocapacityComparisonUI <- function (id) {
+resourceComparisonUI <- function (id, record) {
   ns <- NS(id)
   
+  resources <- c(
+    "crop_land",
+    "forest_land",
+    "fishing_ground",
+    "built_up_land",
+    "grazing_land",
+    "total"
+  )
+  if (record == 'Footprint') {
+    resources[6] <- 'carbon'
+    resources[7] <- 'total'
+  }
+  
   tagList(
-    h2("How do different regions compare in biocapacity?"),
+    h2(paste0("How do different regions compare in their ", record, "?")),
     
     sidebarLayout(
       sidebarPanel(
@@ -49,15 +62,8 @@ biocapacityComparisonUI <- function (id) {
         
         selectInput(
           ns("resourceType"),
-          label = "Biocapacity to compare",
-          choices = c(
-            "crop_land",
-            "forest_land",
-            "fishing_ground",
-            "built_up_land",
-            "grazing_land",
-            "total"
-          ),
+          label = "Resource to compare",
+          choices = resources,
           selected = "crop_land"
         ),
         
@@ -84,31 +90,31 @@ biocapacityComparisonUI <- function (id) {
       
       mainPanel(
         br(),
-        plotlyOutput(ns("biocapComparison")),
+        plotlyOutput(ns("resourceComparison")),
         h4("Magnitude comparison of different regions"),
-        plotlyOutput(ns("biocapDistribution"))
+        plotlyOutput(ns("resourceDistribution"))
       )
     )
   )
 }
 
 
-biocapacityComparison <- function (input, output, session, selectBiocapData) {
+resourceComparison <- function (input, output, session, selectResourceData, record) {
   
-  bioCapComparisonData1 <- reactive({
-    selectBiocapData(input$regionType, input$country1, input$region1, input$dataType, input$years)
+  resourceComparisonData1 <- reactive({
+    selectResourceData(input$regionType, input$country1, input$region1, input$dataType, input$years)
   })
-  bioCapComparisonData2 <- reactive({
-    selectBiocapData(input$regionType, input$country2, input$region2, input$dataType, input$years)
+  resourceComparisonData2 <- reactive({
+    selectResourceData(input$regionType, input$country2, input$region2, input$dataType, input$years)
   })
-  bioCapComparisonRegion1 <- reactive({
+  resourceComparisonRegion1 <- reactive({
     if (input$regionType == 'Continents') {
       input$region1
     } else {
       input$country1
     }
   })
-  bioCapComparisonRegion2 <- reactive({
+  resourceComparisonRegion2 <- reactive({
     if (input$regionType == 'Continents') {
       input$region2
     } else {
@@ -117,31 +123,31 @@ biocapacityComparison <- function (input, output, session, selectBiocapData) {
   })
   
   
-  output$biocapComparison <- renderPlotly({
-    comparison_data <- merge(bioCapComparisonData1()[, c("year", input$resourceType)], 
-                             bioCapComparisonData2()[, c("year", input$resourceType)],
+  output$resourceComparison <- renderPlotly({
+    comparison_data <- merge(resourceComparisonData1()[, c("year", input$resourceType)], 
+                             resourceComparisonData2()[, c("year", input$resourceType)],
                              by = "year", sort = TRUE, all = TRUE)
     plot_ly(
       comparison_data,
       x = ~ year,
-      name = bioCapComparisonRegion1(),
+      name = resourceComparisonRegion1(),
       y = as.formula(sprintf("~ %s.x", input$resourceType)),
       type = 'scatter',
       mode = 'lines'
     ) %>%
-      add_trace(name = bioCapComparisonRegion2(),
+      add_trace(name = resourceComparisonRegion2(),
                 y = as.formula(sprintf("~ %s.y", input$resourceType)),
                 mode = 'lines') %>%
       layout(
-        title = sprintf("Biocapacity Evolution of %s", input$resourceType),
+        title = sprintf("%s Evolution of %s", record, input$resourceType),
         xaxis = list(title = "Year"),
-        yaxis = list (title = "Biocapacity in global hectares")
+        yaxis = list (title = paste0(record, " in global hectares"))
       )
   })
   
-  output$biocapDistribution <- renderPlotly({
-    data1 <- bioCapComparisonData1()
-    data2 <- bioCapComparisonData2()
+  output$resourceDistribution <- renderPlotly({
+    data1 <- resourceComparisonData1()
+    data2 <- resourceComparisonData2()
     
     # restructure data for grouped box plot
     combiData <- rbind(data1, data2)
@@ -157,10 +163,17 @@ biocapacityComparison <- function (input, output, session, selectBiocapData) {
     bdata <- data.frame(region = combiData$region, value = combiData$built_up_land)
     bdata$type <- "built_up_land"
     
-    combiData <- rbind(cdata, gdata, fdata, fgdata, bdata)
+    if (record == 'Footprint') {
+      codata <- data.frame(region = combiData$region, value = combiData$carbon)
+      codata$type <- "carbon"
+      
+      combiData <- rbind(cdata, gdata, fdata, fgdata, bdata, codata)
+    } else {
+      combiData <- rbind(cdata, gdata, fdata, fgdata, bdata)
+    }
     
     plot_ly(combiData, x = ~value, y = ~type, color = ~region, type = "box") %>%
-      layout(xaxis = list(title = "Biocapacity in GHA"), 
+      layout(xaxis = list(title = paste0(record, " in GHA")), 
              boxmode = "group")
   })
 }

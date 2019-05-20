@@ -2,11 +2,11 @@ library(shiny)
 
 # Prepare data
 source("./load-data.R", local = TRUE)
-source("./biocapacity-data.R", local = TRUE)
+source("./prepare-data.R", local = TRUE)
 
 # Load modules
-source("./biocapacity-trend.R", local = TRUE)
-source("./biocapacity-comparison.R", local = TRUE)
+source("./resource-trend.R", local = TRUE)
+source("./resource-comparison.R", local = TRUE)
 
 source("./map.R", local = TRUE)
 
@@ -29,7 +29,7 @@ ui <- navbarPage("National Footprint Visualization",
       #####################
       tabPanel("Trend",
        br(),
-       biocapacityTrendUI("bcTrend")
+       resourceTrendUI("bcTrend", "biocapacity")
       ),
   
       #####################
@@ -37,7 +37,33 @@ ui <- navbarPage("National Footprint Visualization",
       #####################
       tabPanel("Comparison", 
        br(),
-       biocapacityComparisonUI("bcComp")
+       resourceComparisonUI("bcComp", "Biocapacity")
+      )
+    ),
+    br()
+  )),
+  
+  #####################
+  # Footprint
+  #####################
+  tabPanel("Footprint", fluidPage(
+    
+    tabsetPanel(type = "tabs",
+                
+      #####################
+      # Footprint trends
+      #####################
+      tabPanel("Trend",
+         br(),
+         resourceTrendUI("efTrend", "footprint")
+      ),
+      
+      #####################
+      # Footprint comparison
+      #####################
+      tabPanel("Comparison",
+         br(),
+         resourceComparisonUI("efComp", "Footprint")
       )
     ),
     br()
@@ -61,10 +87,19 @@ server <- function(input, output) {
   # Biocapacity
   #####################
   # Biocapacity Trends
-  callModule(biocapacityTrend, "bcTrend", selectBiocapData)
+  callModule(resourceTrend, "bcTrend", selectBiocapData, 'Biocapacity')
   
   # Biocapacity comparison
-  callModule(biocapacityComparison, "bcComp", selectBiocapData)
+  callModule(resourceComparison, "bcComp", selectBiocapData, "Biocapacity")
+  
+  #####################
+  # Footprint
+  #####################
+  # Footprint Trends
+  callModule(resourceTrend, "efTrend", selectFootprintData, 'Footprint')
+  
+  # Footprint comparison
+  callModule(resourceComparison, "efComp", selectFootprintData, 'Footprint')
   
   
   #####################

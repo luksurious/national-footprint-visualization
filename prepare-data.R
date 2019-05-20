@@ -31,22 +31,85 @@ capitaBiocapContinent <- aggregate(
   sum
 )
 
+# Footprint data
+totalFootprintPerCountry <- rawData[rawData$record == "EFConsTotGHA",]
+capitaFootprintPerCountry <- rawData[rawData$record == "EFConsPerCap",]
+
+totalFootprintContinent <- aggregate(
+  cbind(
+    crop_land,
+    grazing_land,
+    forest_land,
+    fishing_ground,
+    built_up_land,
+    population,
+    carbon,
+    total
+  ) ~ year + UN_region,
+  totalFootprintPerCountry,
+  sum
+)
+
+capitaFootprintContinent <- aggregate(
+  cbind(
+    crop_land,
+    grazing_land,
+    forest_land,
+    fishing_ground,
+    built_up_land,
+    population,
+    carbon,
+    total
+  ) ~ year + UN_region,
+  capitaFootprintPerCountry,
+  sum
+)
+
 # Function to select data depending on input
-selectBiocapData <-
-  function(regionType,
+selectBiocapData <- function (regionType,
+                              country,
+                              region,
+                              dataType,
+                              years) {
+  return(selectData('Biocap', regionType, country, region, dataType, years))
+}
+
+selectFootprintData <- function (regionType,
+                              country,
+                              region,
+                              dataType,
+                              years) {
+  return(selectData('Footprint', regionType, country, region, dataType, years))
+}
+
+selectData <-
+  function(record,
+           regionType,
            country,
            region,
            dataType,
            years) {
     if (regionType == 'Countries') {
       if (dataType == 'Per person') {
-        data <- capitaBiocapPerCountry
+        if (record == 'Biocap') {
+          data <- capitaBiocapPerCountry
+        } else {
+          data <- capitaFootprintPerCountry
+        }
       } else {
-        data <- totalBiocapPerCountry
+        if (record == 'Biocap') {
+          data <- totalBiocapPerCountry
+        } else {
+          data <- totalFootprintPerCountry
+        }
       }
       region <- country
     } else {
-      data <- totalBiocapContinent
+      if (record == 'Biocap') {
+        data <- totalBiocapContinent
+      } else {
+        data <- totalFootprintContinent
+      }
     }
     
     
