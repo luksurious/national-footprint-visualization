@@ -3,7 +3,9 @@ library(plotly)
 mapVisualizationUI <- function (id) {
   ns <- NS(id)
   
-  tagList(fluidRow(
+  tagList(
+    h2("Are geographic patterns visible for different biocapacity, footprint resources or the ecological deficit?"),
+    fluidRow(
     column(3,
            radioButtons(
              ns("recordType"),
@@ -68,7 +70,7 @@ mapVisualizationUI <- function (id) {
         value = dataYears[2],
         sep = "",
         step = 1,
-        animate = animationOptions(interval = 300)
+        animate = animationOptions(interval = 400)
       )
     )
   ),

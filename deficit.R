@@ -1,5 +1,4 @@
 library(plotly)
-library(tidyverse)
 
 # Resource trend
 deficitTrendUI <- function (id) {
@@ -88,11 +87,6 @@ deficitTrend <- function (input, output, session) {
     highEFData <- mydata[mydata$total.x > mydata$total.y,]
     highBioData <- mydata[mydata$total.y > mydata$total.x,]
     
-    # TODO: figure out gaps, and add connecting trace
-    
-    # TODO1: find end points of traces
-    # TODO2: calculate 0 point
-    # TODO3: create new traces for +- of 0 point
     highEFRanges <- getEdgesOfTrace(highEFData$year, input$years[1], input$years[2])
     highBioRanges <- getEdgesOfTrace(highBioData$year, input$years[1], input$years[2])
     

@@ -16,6 +16,8 @@ source("./gdp-vs-ef.R", local = TRUE)
 
 source("./deficit.R", local = TRUE)
 
+source("./country-clusters.R", local = TRUE)
+
 # UI Definition
 ui <- navbarPage("National Footprint Visualization",
                  
@@ -81,6 +83,9 @@ ui <- navbarPage("National Footprint Visualization",
   ),
   tabPanel("Ecological Deficit",
     deficitTrendUI("deficit")
+  ),
+  tabPanel("Footprint clusters",
+           countryClusterUI("cluster")
   )
 )
 
@@ -127,6 +132,8 @@ server <- function(input, output) {
   #####################
   callModule(deficitTrend, "deficit")
   
+  
+  callModule(countryCluster, "cluster")
 }
 
 # Run the application 
