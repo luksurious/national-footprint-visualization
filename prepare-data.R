@@ -194,10 +194,6 @@ deficitData <- function (regionType, dataType) {
     within(cur_data, diff <- total.y - total.x)
   
   cur_data <- cur_data[order(cur_data$year), ]
-  
-  #names(cur_data)[names(cur_data) == "UN_region"] <- "region"
-  #names(cur_data)[names(cur_data) == "country"] <- "region"
-  
 
   return(cur_data)
 }

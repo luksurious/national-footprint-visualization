@@ -19,6 +19,8 @@ element1 = select(
 )
 
 ## Data preparation
+
+# TODO: choose correct record type!
 element2 <- (
   element1 %>%
     group_by(ISO.alpha.3.code, country, year, population) %>%
@@ -28,6 +30,7 @@ element2 <- (
 
 mapData <- element1[element1$year == 2014 & element1$record == 'EFConsTotGHA', ]
 
+# TODO: choose correct record type!
 element3 = aggregate(cbind(carbon, population) ~ UN_region + year, element1, FUN =
                        sum)
 
@@ -48,13 +51,13 @@ carbonEmissionsUI <- function (id) {
         selectInput(
           ns("countries1"),
           "Country1",
-          choices = levels(element1$country),
+          choices = dataCountries,
           selected = "China"
         ),
         selectInput(
           ns("countries2"),
           "Country2",
-          choices = levels((element1$country)),
+          choices = dataCountries,
           selected = "Africa"
         ),
         #checkboxInput(ns("fit"), "Add line of best fit", FALSE),
@@ -81,12 +84,10 @@ carbonEmissionsUI <- function (id) {
         selectInput(
           ns("continent1"),
           "Continent1",
-          choices = levels(element1$UN_region),
+          choices = dataRegions,
           selected = "Asia"
         ),
-        selectInput(ns("continent2"), "Continent2", choices = levels((
-          element1$UN_region
-        ))),
+        selectInput(ns("continent2"), "Continent2", choices = dataRegions),
         #checkboxInput(ns("fit"), "Add line of best fit", FALSE),
         fluidRow(column(
           5,
@@ -112,9 +113,9 @@ carbonEmissionsUI <- function (id) {
       sliderInput(
         ns("years"),
         "Years",
-        min(element1$year),
-        max(element1$year),
-        value = c(1970, 2001)
+        dataYears[1],
+        dataYears[2],
+        value = c(1970, dataYears[2])
       )
     ),
     mainPanel(

@@ -139,7 +139,7 @@ countryCluster <- function (input, output, session) {
     
     for (i in 1:n - 1) {
       name <- paste("Cluster", toString(i + 1))
-      print(name)
+      
       b <- c(b, name)
       
       clu <- theData[theData$cluster == toString(i + 1), ]

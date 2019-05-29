@@ -1,16 +1,19 @@
 library(plotly)
 
 # Resource trend
-resourceTrendUI <- function (id, record) {
+resourceTrendUI <- function (id) {
   ns <- NS(id)
   
   tagList(
-    h2(
-      paste0("Are there different trends in the evolution of the different ", record, " resources?")
-    ),
-    
     sidebarLayout(
       sidebarPanel(
+        radioButtons(
+          ns("recordType"),
+          label = "Data",
+          choices = c("Biocapacity", "Footprint"),
+          selected = "Biocapacity"
+        ),
+        
         radioButtons(
           ns("regionType"),
           label = "Type of region",
@@ -56,30 +59,43 @@ resourceTrendUI <- function (id, record) {
           ),
           sep = "",
           step = 1
-        ),
-        
-        checkboxInput(ns("show_total"), label = "Show totals")
+        )
       ),
       
       mainPanel(
-        plotlyOutput(ns("plot")),
-        h4("Changes in the resource types over the selected period", align = "center"),
-        fluidRow(splitLayout(
-          cellWidths = c("50%", "50%"),
-          plotlyOutput(ns("absoluteChange")),
-          plotlyOutput(ns("relativeChange"))
-        ))
+        tabsetPanel(
+          tabPanel(
+            'Over time',
+            
+            h2("Are there different trends in the evolution of the different resources?"),
+            plotlyOutput(ns("plot"))
+          ),
+          tabPanel(
+            'Change',
+            
+            h2("How much have the different resources changed over the years?", align = "center"),
+            fluidRow(splitLayout(
+              cellWidths = c("50%", "50%"),
+              plotlyOutput(ns("absoluteChange")),
+              plotlyOutput(ns("relativeChange"))
+            ))
+          ),
+          type = 'pills'
+        )
       )
     )
   )
 }
 
-resourceTrend <- function (input, output, session, selectResourceData, record) {
+resourceTrend <- function (input, output, session) {
   
   resourceTrendData <- reactive({
-    selectResourceData(input$regionType, input$country, input$region, input$dataType, input$years)
+    if (input$recordType == 'Footprint') {
+      selectFootprintData(input$regionType, input$country, input$region, input$dataType, input$years)
+    } else {
+      selectBiocapData(input$regionType, input$country, input$region, input$dataType, input$years)
+    }
   })  
-  
   
   output$plot <- renderPlotly({
     p <-
@@ -104,28 +120,26 @@ resourceTrend <- function (input, output, session, selectResourceData, record) {
                 name = 'built up land',
                 mode = 'lines') %>%
       layout(
-        title = paste0("Total ", record, " Development"),
+        title = paste0("Total ", input$recordType, " Development"),
         xaxis = list(title = "Year"),
-        yaxis = list (title = paste0(record, " in global hectares"))
+        yaxis = list (title = paste0(input$recordType, " in global hectares"))
       )
     
-    if (record == 'Footprint') {
+    if (input$recordType == 'Footprint') {
       p <- add_trace(
         y = ~ carbon,
-        name = 'Carbon emissions',
+        name = 'carbon emissions',
         mode = 'lines',
         p = p
       )
     }
-    
-    if (input$show_total == TRUE) {
-      p <- add_trace(
-        y = ~ total,
-        name = 'total',
-        mode = 'lines',
-        p = p
-      )
-    }
+    p <- add_trace(
+      p = p,
+      y = ~ total,
+      name = 'total',
+      mode = 'lines',
+      visible = "legendonly"
+    )
     
     p
   })
@@ -135,7 +149,6 @@ resourceTrend <- function (input, output, session, selectResourceData, record) {
   #########
   resourceChangeData <- reactive({
     cur_data <- resourceTrendData()
-    #cur_data <- cur_data[cur_data$year == input$years[1] | cur_data$year == input$years[2], ]
     cur_data <- cur_data[cur_data$year == min(cur_data$year) | cur_data$year == max(cur_data$year), ]
     
     crop_change <- cur_data$crop_land[2] - cur_data$crop_land[1]
@@ -156,7 +169,7 @@ resourceTrend <- function (input, output, session, selectResourceData, record) {
     relative <- c(crop_relative, forest_relative, grazing_relative, fishing_relative, built_relative)
     
     
-    if (record == 'Footprint') {
+    if (input$recordType == 'Footprint') {
       carbon_change <- cur_data$carbon[2] - cur_data$carbon[1]
       carbon_relative <- carbon_change / cur_data$carbon[1]
       
@@ -180,11 +193,11 @@ resourceTrend <- function (input, output, session, selectResourceData, record) {
     }
     
     text <- paste(formatC(data$absolute/factor, format = "f", big.mark = ",", digits = 2, flag = '+'), suffix)
-    plot_ly(data, x = ~type, y = ~absolute, type = 'bar', text = text, textposition = 'auto'
-    ) %>%
-      layout(yaxis = list(title = paste0("Absolute change of ", record, " in GHA")),
-             xaxis = list(title = paste0("Type of ", record)))
+    plot_ly(data, x = ~type, y = ~absolute, type = 'bar', text = text, textposition = 'auto') %>%
+      layout(yaxis = list(title = paste0("Absolute change of ", input$recordType, " in GHA")),
+             xaxis = list(title = paste0("Type of ", input$recordType)))
   })
+  
   output$relativeChange <- renderPlotly({
     data <- resourceChangeData()
     text <- paste(formatC(data$relative*100, format = "f", digits = 2, flag = '+'), "%")
@@ -192,8 +205,8 @@ resourceTrend <- function (input, output, session, selectResourceData, record) {
             textposition = 'auto',
             marker = list(color = 'rgb(158,202,225)',
                           line = list(color = 'rgb(8,48,107)', width = 1.5))) %>%
-      layout(yaxis = list(title = paste0("Relative change of ", record)),
-             xaxis = list(title = paste0("Type of ", record)))
+      layout(yaxis = list(title = paste0("Relative change of ", input$recordType)),
+             xaxis = list(title = paste0("Type of ", input$recordType)))
   })
   
 }

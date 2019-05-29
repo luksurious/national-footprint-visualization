@@ -22,56 +22,31 @@ source("./country-clusters.R", local = TRUE)
 ui <- navbarPage("National Footprint Visualization",
                  
   #####################
-  # Biocapacity
+  # Biocapacity & Footprint
   #####################
-  tabPanel("Biocapacity", fluidPage(
+  tabPanel("Biocapacity & Footprint", fluidPage(
 
     tabsetPanel(type = "tabs",
                 
       #####################
-      # Biocapacity trends
+      # Biocapacity & Footprint trends
       #####################
       tabPanel("Trend",
        br(),
-       resourceTrendUI("bcTrend", "biocapacity")
+       resourceTrendUI("bcTrend")
       ),
   
       #####################
-      # Biocapacity comparison
+      # Biocapacity & Footprint comparison
       #####################
       tabPanel("Comparison", 
        br(),
-       resourceComparisonUI("bcComp", "Biocapacity")
+       resourceComparisonUI("bcComp")
       )
     ),
     br()
   )),
   
-  #####################
-  # Footprint
-  #####################
-  tabPanel("Footprint", fluidPage(
-    
-    tabsetPanel(type = "tabs",
-                
-      #####################
-      # Footprint trends
-      #####################
-      tabPanel("Trend",
-         br(),
-         resourceTrendUI("efTrend", "footprint")
-      ),
-      
-      #####################
-      # Footprint comparison
-      #####################
-      tabPanel("Comparison",
-         br(),
-         resourceComparisonUI("efComp", "Footprint")
-      )
-    ),
-    br()
-  )),
   tabPanel("Carbon emissions",
     carbonEmissionsUI("carbon")
   ),
@@ -93,23 +68,13 @@ ui <- navbarPage("National Footprint Visualization",
 server <- function(input, output) {
   
   #####################
-  # Biocapacity
+  # Biocapacity & Footprint
   #####################
-  # Biocapacity Trends
-  callModule(resourceTrend, "bcTrend", selectBiocapData, 'Biocapacity')
+  # Trends
+  callModule(resourceTrend, "bcTrend")
   
-  # Biocapacity comparison
-  callModule(resourceComparison, "bcComp", selectBiocapData, "Biocapacity")
-  
-  #####################
-  # Footprint
-  #####################
-  # Footprint Trends
-  callModule(resourceTrend, "efTrend", selectFootprintData, 'Footprint')
-  
-  # Footprint comparison
-  callModule(resourceComparison, "efComp", selectFootprintData, 'Footprint')
-  
+  # comparison
+  callModule(resourceComparison, "bcComp")
   
   #####################
   # Carbon Emissions
