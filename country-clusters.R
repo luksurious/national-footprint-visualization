@@ -104,7 +104,7 @@ countryCluster <- function (input, output, session) {
     clusterCenters <- as.data.frame(clusters$centers)
     
     
-    plot_ly(theData) %>%
+    plot_ly(theData, mode = "markers", type = "scatter") %>%
       add_trace(
         data = theData,
         x = as.formula(paste0("~", input$xcol)),

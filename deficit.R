@@ -18,8 +18,8 @@ deficitTrendUI <- function (id) {
           selected = "Continents"
         ),
         conditionalPanel(
-          condition = paste0("input['", ns("regionType"), "'] == 'Continents'"),
-          
+          condition = "input.regionType == 'Continents'",
+          ns = ns,
           selectInput(
             ns("region"),
             label = "Choose the region to show in the chart",
@@ -28,8 +28,8 @@ deficitTrendUI <- function (id) {
           )
         ),
         conditionalPanel(
-          condition = paste0("input['", ns("regionType"), "'] == 'Countries'"),
-          
+          condition = "input.regionType == 'Countries'",
+          ns = ns,
           selectInput(
             ns("country"),
             label = "Choose the country to show in the chart",

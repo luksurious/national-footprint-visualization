@@ -42,6 +42,10 @@ ui <- navbarPage("National Footprint Visualization",
       tabPanel("Comparison", 
        br(),
        resourceComparisonUI("bcComp")
+      ),
+      
+      tabPanel("Ecological Deficit",
+               deficitTrendUI("deficit")
       )
     ),
     br()
@@ -55,9 +59,6 @@ ui <- navbarPage("National Footprint Visualization",
   ),
   tabPanel("GDP vs Footprint",
     gdpVsEFUI("gdpVsEf")
-  ),
-  tabPanel("Ecological Deficit",
-    deficitTrendUI("deficit")
   ),
   tabPanel("Footprint clusters",
            countryClusterUI("cluster")

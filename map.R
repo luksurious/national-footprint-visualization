@@ -27,7 +27,8 @@ mapVisualizationUI <- function (id) {
     column(
       3,
       conditionalPanel(
-        condition = paste0('input["', ns('recordType'), '"] == "Ecological Footprint"'),
+        condition = 'input.recordType == "Ecological Footprint"',
+        ns = ns,
         selectInput(
           ns("resourceTypeEF"),
           label = "Resource type to compare",
@@ -44,7 +45,8 @@ mapVisualizationUI <- function (id) {
         )
       ),
       conditionalPanel(
-        condition = paste0('input["', ns('recordType'), '"] == "Biocapacity"'),
+        condition = 'input.recordType == "Biocapacity"',
+        ns = ns,
         selectInput(
           ns("resourceTypeBC"),
           label = "Resource type to compare",

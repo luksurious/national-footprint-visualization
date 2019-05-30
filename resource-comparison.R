@@ -29,8 +29,8 @@ resourceComparisonUI <- function (id) {
         selected = "Continents"
       ),
       conditionalPanel(
-        condition = paste0("input['", ns("regionType"), "'] == 'Continents'"),
-        
+        condition = "input.regionType == 'Continents'",
+        ns = ns,
         selectInput(
           ns("region1"),
           label = "Choose the first region to show in the chart",
@@ -45,8 +45,8 @@ resourceComparisonUI <- function (id) {
         )
       ),
       conditionalPanel(
-        condition = paste0("input['", ns("regionType"), "'] == 'Countries'"),
-        
+        condition = "input.regionType == 'Countries'",
+        ns = ns,
         selectInput(
           ns("country1"),
           label = "Choose the first country to show in the chart",
@@ -62,7 +62,8 @@ resourceComparisonUI <- function (id) {
       ),
       
       conditionalPanel(
-        condition = paste0("input['", ns("resCompTab"), "'] == 'Trend'"),
+        condition = "input.resCompTab == 'Trend'",
+        ns = ns,
         selectInput(
           ns("resourceType"),
           label = "Resource to compare",
@@ -79,8 +80,8 @@ resourceComparisonUI <- function (id) {
       ),
       
       conditionalPanel(
-        condition = paste0("input['", ns("resCompTab"), "'] == 'Resource characteristics'"),
-        
+        condition = "input.resCompTab == 'Resource characteristics'",
+        ns = ns,
         sliderInput(
           ns("year"),
           "Year",
@@ -93,8 +94,8 @@ resourceComparisonUI <- function (id) {
         )
       ),
       conditionalPanel(
-        condition = paste0("input['", ns("resCompTab"), "'] != 'Resource characteristics'"),
-        
+        condition = "input.resCompTab != 'Resource characteristics'",
+        ns = ns,
         sliderInput(
           ns("years"),
           "Years",
@@ -250,6 +251,8 @@ resourceComparison <- function (input, output, session) {
       combiData <- rbind(cdata, gdata, fdata, fgdata, bdata)
     }
     
+    combiData$region <- droplevels(combiData$region)
+    
     combiData
   })
   
@@ -259,6 +262,7 @@ resourceComparison <- function (input, output, session) {
       x = ~ value,
       y = ~ type,
       color = ~ region,
+      colors = 'Set1',
       type = "box"
     ) %>%
       layout(xaxis = list(title = paste0(input$recordType, " in GHA")),
