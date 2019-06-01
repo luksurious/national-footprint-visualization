@@ -3,7 +3,9 @@ library(plotly)
 mapVisualizationUI <- function (id) {
   ns <- NS(id)
   
-  tagList(fluidRow(
+  tagList(
+    h2("Are geographic patterns visible for different biocapacity, footprint resources or the ecological deficit?"),
+    fluidRow(
     column(3,
            radioButtons(
              ns("recordType"),
@@ -25,7 +27,8 @@ mapVisualizationUI <- function (id) {
     column(
       3,
       conditionalPanel(
-        condition = paste0('input["', ns('recordType'), '"] == "Ecological Footprint"'),
+        condition = 'input.recordType == "Ecological Footprint"',
+        ns = ns,
         selectInput(
           ns("resourceTypeEF"),
           label = "Resource type to compare",
@@ -42,7 +45,8 @@ mapVisualizationUI <- function (id) {
         )
       ),
       conditionalPanel(
-        condition = paste0('input["', ns('recordType'), '"] == "Biocapacity"'),
+        condition = 'input.recordType == "Biocapacity"',
+        ns = ns,
         selectInput(
           ns("resourceTypeBC"),
           label = "Resource type to compare",
@@ -68,7 +72,7 @@ mapVisualizationUI <- function (id) {
         value = dataYears[2],
         sep = "",
         step = 1,
-        animate = animationOptions(interval = 300)
+        animate = animationOptions(interval = 400)
       )
     )
   ),
@@ -108,22 +112,12 @@ mapVisualization <- function (input, output, session) {
         }
       },
       "Ecological Deficit/Reserve" = {
-        if (input$dataType == 'Total') {
-          cur_data <- merge(rawData[rawData$record == 'EFConsTotGHA' &
-                                      rawData$year == input$year, c("ISO.alpha.3.code", "total")],
-                            totalBiocapPerCountry[totalBiocapPerCountry$year == input$year, c("ISO.alpha.3.code", "total")],
-                            by = "ISO.alpha.3.code")
-        } else {
-          cur_data <- merge(rawData[rawData$record == 'EFConsPerCap' &
-                                      rawData$year == input$year, c("ISO.alpha.3.code", "total")],
-                            capitaBiocapPerCountry[capitaBiocapPerCountry$year == input$year, c("ISO.alpha.3.code", "total")],
-                            by = "ISO.alpha.3.code")
-        }
-        cur_data <-
-          cur_data[cur_data$ISO.alpha.3.code != "",]
+        cur_data <- deficitData("Countries", input$dataType)
         
         cur_data <-
-          within(cur_data, diff <- total.y - total.x)
+          cur_data[cur_data$year == input$year &
+                     cur_data$ISO.alpha.3.code.x != "",]
+        names(cur_data)[names(cur_data) == "ISO.alpha.3.code.x"] <- "ISO.alpha.3.code"
       }
     )
     

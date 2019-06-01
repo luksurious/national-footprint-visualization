@@ -1,5 +1,7 @@
 # National Footprint Visualization
 
+Live version available at: https://jiegao.shinyapps.io/national-footprint-visualization/ (30st May 2019)
+
 Live version available at: https://luksurious.shinyapps.io/national-footprint/ (May 2019)
 
 ## Set up

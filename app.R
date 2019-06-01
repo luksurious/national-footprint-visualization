@@ -2,65 +2,80 @@ library(shiny)
 
 # Prepare data
 source("./load-data.R", local = TRUE)
-source("./biocapacity-data.R", local = TRUE)
+source("./prepare-data.R", local = TRUE)
 
 # Load modules
-source("./biocapacity-trend.R", local = TRUE)
-source("./biocapacity-comparison.R", local = TRUE)
+source("./resource-trend.R", local = TRUE)
+source("./resource-comparison.R", local = TRUE)
 
 source("./map.R", local = TRUE)
 
 source("./carbon.R", local = TRUE)
 
+source("./gdp-vs-ef.R", local = TRUE)
+
+source("./deficit.R", local = TRUE)
+
+source("./country-clusters.R", local = TRUE)
+
 # UI Definition
 ui <- navbarPage("National Footprint Visualization",
                  
   #####################
-  # Biocapacity
+  # Biocapacity & Footprint
   #####################
-  tabPanel("Biocapacity", fluidPage(
+  tabPanel("Biocapacity & Footprint", fluidPage(
 
     tabsetPanel(type = "tabs",
                 
       #####################
-      # Biocapacity trends
+      # Biocapacity & Footprint trends
       #####################
       tabPanel("Trend",
        br(),
-       biocapacityTrendUI("bcTrend")
+       resourceTrendUI("bcTrend")
       ),
   
       #####################
-      # Biocapacity comparison
+      # Biocapacity & Footprint comparison
       #####################
       tabPanel("Comparison", 
        br(),
-       biocapacityComparisonUI("bcComp")
+       resourceComparisonUI("bcComp")
+      ),
+      
+      tabPanel("Ecological Deficit",
+               deficitTrendUI("deficit")
       )
     ),
     br()
   )),
+  
   tabPanel("Carbon emissions",
     carbonEmissionsUI("carbon")
   ),
   tabPanel("Map",
     mapVisualizationUI("map")
   ),
-  tabPanel("...")
+  tabPanel("GDP vs Footprint",
+    gdpVsEFUI("gdpVsEf")
+  ),
+  tabPanel("Footprint clusters",
+           countryClusterUI("cluster")
+  )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
   #####################
-  # Biocapacity
+  # Biocapacity & Footprint
   #####################
-  # Biocapacity Trends
-  callModule(biocapacityTrend, "bcTrend", selectBiocapData)
+  # Trends
+  callModule(resourceTrend, "bcTrend")
   
-  # Biocapacity comparison
-  callModule(biocapacityComparison, "bcComp", selectBiocapData)
-  
+  # comparison
+  callModule(resourceComparison, "bcComp")
   
   #####################
   # Carbon Emissions
@@ -72,6 +87,19 @@ server <- function(input, output) {
   #####################
   callModule(mapVisualization, "map")
   
+  
+  #####################
+  # GDP vs Footprint Visualization
+  #####################
+  callModule(gdpVsEF, "gdpVsEf")
+  
+  #####################
+  # Deficit Visualization
+  #####################
+  callModule(deficitTrend, "deficit")
+  
+  
+  callModule(countryCluster, "cluster")
 }
 
 # Run the application 
