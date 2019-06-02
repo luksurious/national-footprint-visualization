@@ -1,4 +1,6 @@
-
+############################
+# Author: Peizhe Hou
+############################
 
 footprintTotal <-
   rawData[rawData$country != 'World' &
