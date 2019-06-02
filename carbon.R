@@ -117,10 +117,10 @@ carbonEmissionsUI <- function (id) {
     mainPanel(
       tabsetPanel(
         type = "tabs",
-        tabPanel("Comparison",h3("How changes of total CO2 emission in selected countries?"), plotlyOutput(ns("plot_comparison"))),
-        tabPanel("Distribution",h3("What the distribution of CO2 emission in different continents?"), plotlyOutput(ns("plot_box"))),
-        tabPanel('Evolution',h3("What is the revolution of CO2 emission ?"),plotlyOutput(ns("plot_stream"))),
-        tabPanel('World CO2 emission map',h3("How does changes of CO2 all the world over years ?"), plotlyOutput(ns("map")))
+        tabPanel("Comparison", h3("How did the total CO2 emissions in selected countries change?"), plotlyOutput(ns("plot_comparison"))),
+        tabPanel("Distribution", h3("What is the distribution of CO2 emissions in different continents?"), plotlyOutput(ns("plot_box"))),
+        tabPanel('Evolution', h3("What is the evolution of CO2 emissions?"), plotlyOutput(ns("plot_stream"))),
+        tabPanel('World CO2 emission map', h3("How do CO2 emissions change over the world over years?"), plotlyOutput(ns("map")))
       )
     )
   ))
