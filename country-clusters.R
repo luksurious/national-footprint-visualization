@@ -2,12 +2,8 @@
 # Author: Peizhe Hou
 ############################
 
-footprintTotal <-
-  rawData[rawData$country != 'World' &
-            rawData$record == "EFConsTotGHA", ]
-footprintPerPerson <-
-  rawData[rawData$country != 'World' &
-            rawData$record == "EFConsPerCap", ]
+footprintTotal <- totalFootprintPerCountry[totalFootprintPerCountry$country != 'World', ]
+footprintPerPerson <- capitaFootprintPerCountry[capitaFootprintPerCountry$country != 'World', ]
 
 countryClusterUI <- function (id) {
   ns <- NS(id)
