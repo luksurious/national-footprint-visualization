@@ -1,9 +1,7 @@
+library(shiny)
 library(dplyr)
 library(ggplot2)
-library(tidyverse)
-library(lubridate)
-library(janitor)
-library(gridExtra)
+library(plotly)
 
 element1 = select(
   rawData,
@@ -17,24 +15,18 @@ element1 = select(
   record,
   Percapita.GDP..2010.USD.
 )
-
+element1 <- element1[element1$record == "EFConsTotGHA", ]
 ## Data preparation
 
-# TODO: choose correct record type!
+
 element2 <- (
   element1 %>%
-    group_by(ISO.alpha.3.code, country, year, population) %>%
-    summarise(total_mean = (mean(total)), carbon = mean(carbon))
-)
+    group_by(ISO.alpha.3.code, country, year) 
+    )
+view(element2)
 ##
 
-
-#
-
-mapData <- element1[element1$year == 2014 & element1$record == 'EFConsTotGHA', ]
-
-# TODO: choose correct record type!
-element3 = aggregate(cbind(carbon, population) ~ UN_region + year, element1, FUN =
+element3 = aggregate(cbind(carbon) ~ UN_region + year, element1, FUN =
                        sum)
 
 
