@@ -6,7 +6,8 @@ number_format <- function(x, digits = NULL)
   intl <- c(1e3, 1e6, 1e9, 1e12)
   suffixes <- c(' K', ' M', ' B', ' T')
   
-  i <- findInterval(x, intl);
+  i <- findInterval(x, intl)
+  
   i_neg <- findInterval(-x, intl)
   
   result <- character(length(x))
@@ -15,19 +16,22 @@ number_format <- function(x, digits = NULL)
   ind_format <- !is.na(x) & i > 0
   neg_format <- !is.na(x) & i_neg > 0
   
-  # Format only the elements that need to be formatted 
+  # Format only the elements that need to be formatted
   # with suffixes and possible rounding
   result[ind_format] <- paste0(
-    formatC(x[ind_format]/intl[i[ind_format]], format = "f", digits = digits)
-    ,suffixes[i[ind_format]]
+    formatC(x[ind_format] / intl[i[ind_format]], format = "f", digits = digits),
+    suffixes[i[ind_format]]
   )
+  # Format negative numbers
   result[neg_format] <- paste0(
-    formatC(x[neg_format]/intl[i_neg[neg_format]], format = "f", digits = digits)
-    ,suffixes[i_neg[neg_format]]
+    formatC(x[neg_format] / intl[i_neg[neg_format]], format = "f", digits = digits),
+    suffixes[i_neg[neg_format]]
   )
   
-  # And leave the rest with no changes
-  result[!ind_format & !neg_format] <- as.character(formatC(x[!ind_format & !neg_format], format = "f", digits = digits));
+  # To the rest only apply rounding
+  result[!ind_format & !neg_format] <- as.character(
+    formatC(x[!ind_format & !neg_format], format = "f", digits = digits)
+  )
   
-  return(invisible(result));
+  return(invisible(result))
 }
