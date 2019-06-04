@@ -109,7 +109,7 @@ countryCluster <- function (input, output, session) {
         y = as.formula(paste0("~", input$ycol)),
         text = ~ paste("Country: ", country),
         color = ~ cluster,
-        colors = palette[1:input$clusters]
+        colors = "Set1" #palette[1:input$clusters]
       ) %>%
       add_trace(
         data = clusterCenters,

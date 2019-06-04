@@ -1,4 +1,5 @@
 library(plotly)
+library(tidyverse)
 
 # Resource trend
 deficitTrendUI <- function (id) {

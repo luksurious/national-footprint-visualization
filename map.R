@@ -21,7 +21,7 @@ mapVisualizationUI <- function (id) {
       radioButtons(
         ns("dataType"),
         label = "Total of country or per person?",
-        choices = c("Total", "Per person")
+        choices = c("Per person", "Total")
       )
     ),
     column(
@@ -59,6 +59,19 @@ mapVisualizationUI <- function (id) {
             "grazing_land"
           ),
           selected = "total"
+        )
+      ),
+      conditionalPanel(
+        condition = 'input.recordType == "Ecological Deficit/Reserve"',
+        ns = ns,
+        radioButtons(
+          ns("colorScaleED"),
+          label = "Select colorscale",
+          choices = c(
+            "Semantic segmented (green-red)" = "green-red",
+            "Colorblind friendly (green-purple)" = "green-purple",
+            "Semantic continuous (green-red)" = "continuous"
+          )
         )
       )
     ),
@@ -125,6 +138,60 @@ mapVisualization <- function (input, output, session) {
     cur_data
   })
   
+  divergingColorscale <- reactive({
+    if (input$colorScaleED == 'green-red') {
+      list(
+        list(0, "#67001f"), 
+        list(0.1, "#67001f"),
+        list(0.10000001, "#b2182b"), 
+        list(0.2, "#b2182b"), 
+        list(0.20000001, "#d6604d"), 
+        list(0.35, "#d6604d"), 
+        list(0.35000001, "#f4a582"), 
+        list(0.45, "#f4a582"), 
+        list(0.45000001, "#fddbc7"), 
+        list(0.49999999, "#fddbc7"), 
+        list(0.5, "#F5F5F5"), 
+        list(0.50000001, "#d9f0d3"), 
+        list(0.54999999, "#d9f0d3"), 
+        list(0.55, "#a6dba0"),
+        list(0.64999999, "#a6dba0"),
+        list(0.65, "#5aae61"),
+        list(0.79999999, "#5aae61"),
+        list(0.8, "#1b7837"),
+        list(0.89999999, "#1b7837"),
+        list(0.9, "#00441b"),
+        list(1, "#00441b")
+      )
+    } else if (input$colorScaleED == 'continuous') {
+      list(list(0, "#CD0000"), list(0.495, "#F2BFBF"), list(0.5, "#F5F5F5"), list(0.505, "#D3DCC4"), list(1, "#517212"))
+    } else {
+      list(
+        list(0, "#40004b"), 
+        list(0.1, "#40004b"),
+        list(0.10000001, "#762a83"), 
+        list(0.2, "#762a83"), 
+        list(0.20000001, "#9970ab"), 
+        list(0.35, "#9970ab"), 
+        list(0.35000001, "#c2a5cf"), 
+        list(0.45, "#c2a5cf"), 
+        list(0.45000001, "#e7d4e8"), 
+        list(0.49999999, "#e7d4e8"), 
+        list(0.5, "#F5F5F5"), 
+        list(0.50000001, "#d9f0d3"), 
+        list(0.54999999, "#d9f0d3"), 
+        list(0.55, "#a6dba0"),
+        list(0.64999999, "#a6dba0"),
+        list(0.65, "#5aae61"),
+        list(0.79999999, "#5aae61"),
+        list(0.8, "#1b7837"),
+        list(0.89999999, "#1b7837"),
+        list(0.9, "#00441b"),
+        list(1, "#00441b")
+      )
+    }
+  })
+  
   output$themap <- renderPlotly({
     zmid <- FALSE
     zmax <- FALSE
@@ -136,7 +203,7 @@ mapVisualization <- function (input, output, session) {
     color <- switch (input$recordType,
       "Biocapacity" = "Greens",
       "Ecological Footprint" = "Oranges",
-      "Ecological Deficit/Reserve" = list(list(0, "#CD0000"), list(0.495, "#F2BFBF"), list(0.5, "#F5F5F5"), list(0.505, "#D3DCC4"), list(1, "#517212"))
+      "Ecological Deficit/Reserve" = divergingColorscale()
     )
     dataCol <- switch (input$recordType,
                      "Biocapacity" = input$resourceTypeBC,
@@ -146,7 +213,7 @@ mapVisualization <- function (input, output, session) {
     
     if (input$recordType == "Ecological Deficit/Reserve") {
       zmid <- 0
-      zmax <- min(abs(max(cur_data$diff)), abs(min(cur_data$diff)))
+      zmax <- floor(min(abs(max(cur_data$diff)), abs(min(cur_data$diff))))
       zmin <- -zmax
       
       cur_data$bin <- cut(cur_data$diff, breaks = c(-Inf, seq(zmin, zmax, length.out = 11), Inf), labels = 1:12)
