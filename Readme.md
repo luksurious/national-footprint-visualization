@@ -11,7 +11,7 @@ Live version available at: https://luksurious.shinyapps.io/national-footprint/ (
 The following R packages need to be installed in order to run this Shiny app:
 
 * shiny
-* plotly > 4.9.0
+* plotly >= 4.9.0
 * dplyr
 * ggplot2
 * tidyverse
