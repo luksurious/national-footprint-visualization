@@ -84,15 +84,7 @@ countryCluster <- function (input, output, session) {
   output$plot1 <- renderPlotly({
     palette <-
       c(
-        "#EA2027",
-        "#0652DD",
-        "#FFC312",
-        "#009432",
-        "#FDA7DF",
-        "#1B1464",
-        "#C4E538",
-        "#6F1E51",
-        "#12CBC4"
+        '#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999'
       )
     clusters <- clusters()
     
@@ -102,14 +94,15 @@ countryCluster <- function (input, output, session) {
     clusterCenters <- as.data.frame(clusters$centers)
     
     
-    plot_ly(theData, mode = "markers", type = "scatter") %>%
+    plot_ly(theData, mode = "markers", type = "scatter",
+            colors = palette[1:input$clusters]) %>%
       add_trace(
         data = theData,
         x = as.formula(paste0("~", input$xcol)),
         y = as.formula(paste0("~", input$ycol)),
         text = ~ paste("Country: ", country),
         color = ~ cluster,
-        colors = "Set1" #palette[1:input$clusters]
+        colors = palette[1:input$clusters]
       ) %>%
       add_trace(
         data = clusterCenters,

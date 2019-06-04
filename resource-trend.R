@@ -65,7 +65,7 @@ resourceTrendUI <- function (id) {
       mainPanel(
         tabsetPanel(
           tabPanel(
-            'Over time',
+            'Trend',
             
             h2("Are there different trends in the evolution of the different resources?"),
             plotlyOutput(ns("plot"))
@@ -104,32 +104,29 @@ resourceTrend <- function (input, output, session) {
         x = ~ year,
         name = 'crop land',
         y = ~ crop_land,
+        colors = "Set1",
         type = 'scatter',
-        mode = 'lines'
+        mode = 'lines+markers',
+        marker = list(size = 4)
       ) %>%
       add_trace(y = ~ grazing_land,
-                name = 'grazing land',
-                mode = 'lines') %>%
+                name = 'grazing land') %>%
       add_trace(y = ~ forest_land,
-                name = 'forest land',
-                mode = 'lines') %>%
+                name = 'forest land') %>%
       add_trace(y = ~ fishing_ground,
-                name = 'fishing ground',
-                mode = 'lines') %>%
+                name = 'fishing ground') %>%
       add_trace(y = ~ built_up_land,
-                name = 'built up land',
-                mode = 'lines') %>%
+                name = 'built up land') %>%
       layout(
         title = paste0("Total ", input$recordType, " Development"),
         xaxis = list(title = "Year"),
-        yaxis = list (title = paste0(input$recordType, " in global hectares"))
+        yaxis = list(title = paste0(input$recordType, " in global hectares"))
       )
     
     if (input$recordType == 'Footprint') {
       p <- add_trace(
         y = ~ carbon,
         name = 'carbon emissions',
-        mode = 'lines',
         p = p
       )
     }
@@ -137,7 +134,6 @@ resourceTrend <- function (input, output, session) {
       p = p,
       y = ~ total,
       name = 'total',
-      mode = 'lines',
       visible = "legendonly"
     )
     

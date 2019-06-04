@@ -94,7 +94,8 @@ deficitTrend <- function (input, output, session) {
     
     p <- plot_ly(data=mydata,
       type = 'scatter',
-      mode = 'lines'
+      mode = 'lines+markers',
+      marker = list(size = 4)
     ) %>%
       layout(
         title = "Ecological Reserve/Deficit",
@@ -112,17 +113,17 @@ deficitTrend <- function (input, output, session) {
                 data = rangeData,
                 y = ~ total.x,
                 x = ~ year,
+                marker = list(color = 'red'),
                 name = 'Footprint', legendgroup = "ef",
-                line = list(color = 'red', width = 2),
-                mode = 'lines') %>%
+                line = list(color = 'red', width = 2)) %>%
         add_trace(data = rangeData,
                   y = ~ total.y,
                   x = ~ year,
                   name = 'Biocapacity', legendgroup = "bio",
                   line = list(color = 'green', width = 2),
+                  marker = list(color = 'green'),
                   fillcolor = 'rgba(216, 234, 186, 0.5)',
-                  fill = 'tonexty',
-                  mode = 'lines')
+                  fill = 'tonexty')
       
       if (range$end < input$years[2]) {
         conData <- mydata[mydata$year >= range$end & mydata$year <= (range$end+1),]
@@ -152,6 +153,7 @@ deficitTrend <- function (input, output, session) {
                        name = 'Footprint', legendgroup = "ef",
                        hoverinfo = "skip",
                        showlegend = FALSE,
+                       marker = NULL,
                        line = list(color = 'red', width = 2),
                        mode = 'lines') %>%
           add_trace(data = data.frame(bioX, bioY),
@@ -162,6 +164,7 @@ deficitTrend <- function (input, output, session) {
                     fillcolor = 'rgba(216, 234, 186, 0.5)',
                     showlegend = FALSE,
                     hoverinfo = "skip",
+                    marker = NULL,
                     fill = 'tonexty',
                     mode = 'lines') %>%
           add_trace(data = data.frame(bioX1, bioY1),
@@ -169,6 +172,7 @@ deficitTrend <- function (input, output, session) {
                    x = ~ bioX1,
                    name = 'Biocapacity', legendgroup = "bio",
                    hoverinfo = "skip",
+                   marker = NULL,
                    showlegend = FALSE,
                    line = list(color = 'green', width = 2),
                    mode = 'lines') %>%
@@ -177,6 +181,7 @@ deficitTrend <- function (input, output, session) {
                     x = ~ efX1,
                     name = 'Footprint', legendgroup = "ef",
                     hoverinfo = "skip",
+                    marker = NULL,
                     showlegend = FALSE,
                     line = list(color = 'red', width = 2),
                     fillcolor = 'rgba(234, 216, 186, 0.5)',
@@ -191,18 +196,18 @@ deficitTrend <- function (input, output, session) {
                      y = ~ total.y,
                      showlegend = !hasHighBio,
                      x = ~ year,
+                     marker = list(color = 'green'),
                      name = 'Biocapacity', legendgroup = "bio",
-                     line = list(color = 'green', width = 2),
-                     mode = 'lines') %>%
+                     line = list(color = 'green', width = 2)) %>%
         add_trace(data = rangeData,
                      y = ~ total.x,
                      x = ~ year,
                       showlegend = !hasHighBio,
+                  marker = list(color = 'red'),
                      name = 'Footprint', legendgroup = "ef",
                      line = list(color = 'red', width = 2),
                      fillcolor = 'rgba(234, 216, 186, 0.5)',
-                     fill = 'tonexty',
-                     mode = 'lines')
+                     fill = 'tonexty')
       
       if (range$end < input$years[2]) {
         conData <- mydata[mydata$year >= range$end & mydata$year <= (range$end+1),]
@@ -233,6 +238,7 @@ deficitTrend <- function (input, output, session) {
                     name = 'Biocapacity', legendgroup = "bio",
                     hoverinfo = "skip",
                     showlegend = FALSE,
+                    marker = NULL,
                     line = list(color = 'green', width = 2),
                     mode = 'lines') %>%
           add_trace(data = data.frame(efX1, efY1),
@@ -240,6 +246,7 @@ deficitTrend <- function (input, output, session) {
                     x = ~ efX1,
                     name = 'Footprint', legendgroup = "ef",
                     hoverinfo = "skip",
+                    marker = NULL,
                     showlegend = FALSE,
                     line = list(color = 'red', width = 2),
                     fillcolor = 'rgba(216, 234, 186, 0.5)',
@@ -250,6 +257,7 @@ deficitTrend <- function (input, output, session) {
                        x = ~ efX,
                        name = 'Footprint', legendgroup = "ef",
                        hoverinfo = "skip",
+                    marker = NULL,
                        showlegend = FALSE,
                        line = list(color = 'red', width = 2),
                        mode = 'lines') %>%
@@ -260,6 +268,7 @@ deficitTrend <- function (input, output, session) {
                     line = list(color = 'green', width = 2),
                     fillcolor = 'rgba(234, 216, 186, 0.5)',
                     showlegend = FALSE,
+                    marker = NULL,
                     hoverinfo = "skip",
                     fill = 'tonexty',
                     mode = 'lines')

@@ -221,11 +221,11 @@ resourceComparison <- function (input, output, session) {
       name = resourceComparisonRegion1(),
       y = as.formula(sprintf("~ %s.x", input$resourceType)),
       type = 'scatter',
-      mode = 'lines'
+      mode = 'lines+markers',
+      marker = list(size = 4)
     ) %>%
       add_trace(name = resourceComparisonRegion2(),
-                y = as.formula(sprintf("~ %s.y", input$resourceType)),
-                mode = 'lines') %>%
+                y = as.formula(sprintf("~ %s.y", input$resourceType))) %>%
       layout(
         title = sprintf("%s Evolution of %s", input$recordType, input$resourceType),
         xaxis = list(title = "Year"),

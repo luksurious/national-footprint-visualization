@@ -134,9 +134,50 @@ mapVisualization <- function (input, output, session) {
       }
     )
     
-    
     cur_data
   })
+  
+  sequentialColorscaleRed <- list(
+    list(0, "#fff5f0"),
+    list(0.05, "#fff5f0"),
+    list(0.05000001, "#fee0d2"),
+    list(0.11, "#fee0d2"),
+    list(0.11000001, "#fcbba1"),
+    list(0.22, "#fcbba1"),
+    list(0.22000001, "#fc9272"),
+    list(0.33, "#fc9272"),
+    list(0.33000001, "#fb6a4a"),
+    list(0.44, "#fb6a4a"),
+    list(0.44000001, "#ef3b2c"),
+    list(0.55, "#ef3b2c"),
+    list(0.55000001, "#cb181d"),
+    list(0.66, "#cb181d"),
+    list(0.66000001, "#a50f15"),
+    list(0.77, "#a50f15"),
+    list(0.77000001, "#67000d"),
+    list(1, "#67000d")
+  )
+  
+  sequentialColorscaleGreen <- list(
+    list(0, "#f7fcf5"),
+    list(0.03, "#f7fcf5"),
+    list(0.03000001, "#e5f5e0"),
+    list(0.08, "#e5f5e0"),
+    list(0.08000001, "#c7e9c0"),
+    list(0.15, "#c7e9c0"),
+    list(0.15000001, "#a1d99b"),
+    list(0.25, "#a1d99b"),
+    list(0.25000001, "#74c476"),
+    list(0.36, "#74c476"),
+    list(0.36000001, "#41ab5d"),
+    list(0.47, "#41ab5d"),
+    list(0.47000001, "#238b45"),
+    list(0.60, "#238b45"),
+    list(0.60000001, "#006d2c"),
+    list(0.77, "#006d2c"),
+    list(0.77000001, "#00441b"),
+    list(1, "#00441b")
+  )
   
   divergingColorscale <- reactive({
     if (input$colorScaleED == 'green-red') {
@@ -201,8 +242,8 @@ mapVisualization <- function (input, output, session) {
     cur_data <- mapData()
     
     color <- switch (input$recordType,
-      "Biocapacity" = "Greens",
-      "Ecological Footprint" = "Oranges",
+      "Biocapacity" = sequentialColorscaleGreen,
+      "Ecological Footprint" = sequentialColorscaleRed, #"Oranges",
       "Ecological Deficit/Reserve" = divergingColorscale()
     )
     dataCol <- switch (input$recordType,
@@ -211,16 +252,20 @@ mapVisualization <- function (input, output, session) {
                      "Ecological Deficit/Reserve" = "diff"
     )
     
+    cur_data <- cur_data[!is.na(cur_data[dataCol]),]
+    
     if (input$recordType == "Ecological Deficit/Reserve") {
       zmid <- 0
       zmax <- floor(min(abs(max(cur_data$diff)), abs(min(cur_data$diff))))
       zmin <- -zmax
       
       cur_data$bin <- cut(cur_data$diff, breaks = c(-Inf, seq(zmin, zmax, length.out = 11), Inf), labels = 1:12)
-      
-    }
-    if (input$recordType == "Biocapacity") {
-      reverse <- TRUE
+    } else {
+      zmax <- quantile(unlist(select(cur_data, dataCol)), probs = 0.99)[1]
+      if (zmax > 10) {
+        zmax <- ceiling(zmax)
+      }
+      zmin <- 0
     }
     
     g <- list(
@@ -230,6 +275,8 @@ mapVisualization <- function (input, output, session) {
       showcoastlines = TRUE,
       coastlinecolor = toRGB("grey")
     )
+    
+    # TODO: generate ticks according to colorscale
     
     l <- list(color = toRGB("grey"), width = 0.5)
     

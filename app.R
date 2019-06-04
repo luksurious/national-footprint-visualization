@@ -35,7 +35,7 @@ ui <- navbarPage(
   tabPanel("Biocapacity & Footprint", fluidPage(
 
     tabsetPanel(type = "tabs",
-      tabPanel("Trend",
+      tabPanel("History",
        br(),
        resourceTrendUI("bcTrend")
       ),
