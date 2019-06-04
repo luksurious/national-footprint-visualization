@@ -1,26 +1,30 @@
 library(plotly)
 
+source("./number-format.R")
+
 mapVisualizationUI <- function (id) {
   ns <- NS(id)
   
   tagList(
     h2("Are geographic patterns visible for different biocapacity, footprint resources or the ecological deficit?"),
     fluidRow(
-    column(3,
-           radioButtons(
-             ns("recordType"),
-             label = "Type of data to show",
-             choices = c(
-               "Ecological Deficit/Reserve",
-               "Ecological Footprint",
-               "Biocapacity"
-             )
-           )),
     column(
-      3,
+      2,
+     radioButtons(
+       ns("recordType"),
+       label = "Type of data to show",
+       choices = c(
+         "Ecological Deficit/Reserve",
+         "Ecological Footprint",
+         "Biocapacity"
+       )
+     )
+    ),
+    column(
+      2,
       radioButtons(
         ns("dataType"),
-        label = "Total of country or per person?",
+        label = "",
         choices = c("Per person", "Total")
       )
     ),
@@ -69,11 +73,16 @@ mapVisualizationUI <- function (id) {
           label = "Select colorscale",
           choices = c(
             "Semantic segmented (green-red)" = "green-red",
-            "Colorblind friendly (green-purple)" = "green-purple",
-            "Semantic continuous (green-red)" = "continuous"
+            "Semantic continuous (green-red)" = "continuous",
+            "Colorblind friendly (green-purple)" = "green-purple"
           )
         )
       )
+    ),
+    column(
+      2, 
+      radioButtons(ns("rangeCut"), "Min/Max of colorscale", choices = c(
+        "100% quant. (show extremes)" = 1, "99% quant. (show outliers)" = .99, "95% quant. (ignore outliers)" = .95), selected = .99)
     ),
     column(
       3,
@@ -90,7 +99,9 @@ mapVisualizationUI <- function (id) {
     )
   ),
   
-  plotlyOutput(ns("themap")))
+  plotlyOutput(ns("themap"), height = 600)
+  
+  )
 }
 
 mapVisualization <- function (input, output, session) {
@@ -185,21 +196,21 @@ mapVisualization <- function (input, output, session) {
         list(0, "#67001f"), 
         list(0.1, "#67001f"),
         list(0.10000001, "#b2182b"), 
-        list(0.2, "#b2182b"), 
-        list(0.20000001, "#d6604d"), 
+        list(0.25, "#b2182b"), 
+        list(0.25000001, "#d6604d"), 
         list(0.35, "#d6604d"), 
         list(0.35000001, "#f4a582"), 
         list(0.45, "#f4a582"), 
         list(0.45000001, "#fddbc7"), 
-        list(0.49999999, "#fddbc7"), 
+        list(0.499, "#fddbc7"), 
         list(0.5, "#F5F5F5"), 
-        list(0.50000001, "#d9f0d3"), 
+        list(0.501, "#d9f0d3"), 
         list(0.54999999, "#d9f0d3"), 
         list(0.55, "#a6dba0"),
         list(0.64999999, "#a6dba0"),
         list(0.65, "#5aae61"),
-        list(0.79999999, "#5aae61"),
-        list(0.8, "#1b7837"),
+        list(0.74999999, "#5aae61"),
+        list(0.75, "#1b7837"),
         list(0.89999999, "#1b7837"),
         list(0.9, "#00441b"),
         list(1, "#00441b")
@@ -211,21 +222,21 @@ mapVisualization <- function (input, output, session) {
         list(0, "#40004b"), 
         list(0.1, "#40004b"),
         list(0.10000001, "#762a83"), 
-        list(0.2, "#762a83"), 
-        list(0.20000001, "#9970ab"), 
+        list(0.25, "#762a83"), 
+        list(0.25000001, "#9970ab"), 
         list(0.35, "#9970ab"), 
         list(0.35000001, "#c2a5cf"), 
         list(0.45, "#c2a5cf"), 
         list(0.45000001, "#e7d4e8"), 
-        list(0.49999999, "#e7d4e8"), 
+        list(0.499, "#e7d4e8"), 
         list(0.5, "#F5F5F5"), 
-        list(0.50000001, "#d9f0d3"), 
+        list(0.501, "#d9f0d3"), 
         list(0.54999999, "#d9f0d3"), 
         list(0.55, "#a6dba0"),
         list(0.64999999, "#a6dba0"),
         list(0.65, "#5aae61"),
-        list(0.79999999, "#5aae61"),
-        list(0.8, "#1b7837"),
+        list(0.74999999, "#5aae61"),
+        list(0.75, "#1b7837"),
         list(0.89999999, "#1b7837"),
         list(0.9, "#00441b"),
         list(1, "#00441b")
@@ -237,13 +248,14 @@ mapVisualization <- function (input, output, session) {
     zmid <- FALSE
     zmax <- FALSE
     zmin <- FALSE
-    reverse <- FALSE
+    ticks <- c()
+    ticktext <- c()
     
     cur_data <- mapData()
     
     color <- switch (input$recordType,
       "Biocapacity" = sequentialColorscaleGreen,
-      "Ecological Footprint" = sequentialColorscaleRed, #"Oranges",
+      "Ecological Footprint" = sequentialColorscaleRed,
       "Ecological Deficit/Reserve" = divergingColorscale()
     )
     dataCol <- switch (input$recordType,
@@ -254,18 +266,38 @@ mapVisualization <- function (input, output, session) {
     
     cur_data <- cur_data[!is.na(cur_data[dataCol]),]
     
+    rangeCut <- as.numeric(input$rangeCut)
+    
     if (input$recordType == "Ecological Deficit/Reserve") {
       zmid <- 0
-      zmax <- floor(min(abs(max(cur_data$diff)), abs(min(cur_data$diff))))
+     
+      quants <- quantile(cur_data$diff, c(1-rangeCut, rangeCut))
+      zmax <- max(abs(quants[1]), abs(quants[2]))
       zmin <- -zmax
       
-      cur_data$bin <- cut(cur_data$diff, breaks = c(-Inf, seq(zmin, zmax, length.out = 11), Inf), labels = 1:12)
+      breaks <- as.numeric(matrix(unlist(color), ncol = 2, byrow = TRUE)[c(TRUE, FALSE),1])
+      breaks <- 1 - breaks[1:((length(breaks)-1)/2)] * 2
+      
+      if (length(breaks) > 3) {
+        # keep standard for continuous colorscale
+        ticks <- sort(c(breaks*zmax, 0, breaks*zmin))
+        
+        ticktext <- paste0(number_format(ticks, digits = 2), " GHA")
+        ticktext[1] <- sprintf("< %s", ticktext[1])
+        ticktext[length(ticktext)] <- sprintf("> %s", ticktext[length(ticktext)])
+      }
+      
     } else {
-      zmax <- quantile(unlist(select(cur_data, dataCol)), probs = 0.99)[1]
+      zmax <- quantile(unlist(select(cur_data, dataCol)), probs = rangeCut)[1]
       if (zmax > 10) {
         zmax <- ceiling(zmax)
       }
       zmin <- 0
+      
+      ticks <- c(0, as.numeric(matrix(unlist(color), ncol = 2, byrow = TRUE)[c(FALSE, TRUE),1])) * zmax
+      
+      ticktext <- paste0(number_format(round(ticks, digits = 2), digits = 2), " GHA")
+      ticktext[length(ticktext)] <- sprintf("> %s", ticktext[length(ticktext)])
     }
     
     g <- list(
@@ -276,24 +308,23 @@ mapVisualization <- function (input, output, session) {
       coastlinecolor = toRGB("grey")
     )
     
-    # TODO: generate ticks according to colorscale
-    
     l <- list(color = toRGB("grey"), width = 0.5)
     
-    plot_geo(cur_data, height = 500) %>%
+    plot_geo(cur_data, height = 600) %>%
       add_trace(
         z = as.formula(paste0("~", dataCol)),
         locations = ~ ISO.alpha.3.code,
         color = as.formula(paste0("~", dataCol)),
-        #color = ~bin,
         colorscale = color,
-        reversescale = reverse,
         marker = list(line = l),
         zmid = zmid,
         zmax = zmax,
         zmin = zmin
       ) %>%
       colorbar(
+        tickmode = "array",
+        tickvals = ticks,
+        ticktext = ticktext,
         len = 1,
         title = "",
         ticksuffix = " GHA"

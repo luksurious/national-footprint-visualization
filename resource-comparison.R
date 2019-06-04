@@ -116,14 +116,14 @@ resourceComparisonUI <- function (id) {
         tabPanel(
           'Trend',
                  
-           h2("How do different regions compare in their resources?"),
+           h2("How do different regions compare in their resource trends?"),
            br(),
            plotlyOutput(ns("resourceComparison"))
         ),
         tabPanel(
-          'Resource characteristics',
+          'Resource values',
           
-          h2("How do regions compare in their resources?"),
+          h2("How do regions compare in their resource values?"),
           fluidRow(
             column(
               5,
