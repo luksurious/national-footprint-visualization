@@ -1,5 +1,7 @@
 # National Footprint Visualization
 
+This project visualizes some data of the Global Footprint Network ( https://www.footprintnetwork.org/ )
+
 Live version available at: https://luksurious.shinyapps.io/national-footprint/ (June 2019)
 
 ![](screenshot.png "Screenshot")
