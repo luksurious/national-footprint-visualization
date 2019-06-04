@@ -121,6 +121,7 @@ mapVisualization <- function (input, output, session) {
       }
     )
     
+    
     cur_data
   })
   
@@ -128,13 +129,14 @@ mapVisualization <- function (input, output, session) {
     zmid <- FALSE
     zmax <- FALSE
     zmin <- FALSE
+    reverse <- FALSE
     
     cur_data <- mapData()
     
     color <- switch (input$recordType,
       "Biocapacity" = "Greens",
       "Ecological Footprint" = "Oranges",
-      "Ecological Deficit/Reserve" = "RdBu"
+      "Ecological Deficit/Reserve" = list(list(0, "#CD0000"), list(0.495, "#F2BFBF"), list(0.5, "#F5F5F5"), list(0.505, "#D3DCC4"), list(1, "#517212"))
     )
     dataCol <- switch (input$recordType,
                      "Biocapacity" = input$resourceTypeBC,
@@ -146,10 +148,17 @@ mapVisualization <- function (input, output, session) {
       zmid <- 0
       zmax <- min(abs(max(cur_data$diff)), abs(min(cur_data$diff)))
       zmin <- -zmax
+      
+      cur_data$bin <- cut(cur_data$diff, breaks = c(-Inf, seq(zmin, zmax, length.out = 11), Inf), labels = 1:12)
+      
+    }
+    if (input$recordType == "Biocapacity") {
+      reverse <- TRUE
     }
     
     g <- list(
       scope = 'world',
+      projection = list(type = 'Mercator'),
       showframe = FALSE,
       showcoastlines = TRUE,
       coastlinecolor = toRGB("grey")
@@ -162,14 +171,15 @@ mapVisualization <- function (input, output, session) {
         z = as.formula(paste0("~", dataCol)),
         locations = ~ ISO.alpha.3.code,
         color = as.formula(paste0("~", dataCol)),
-        colors = color,
+        #color = ~bin,
+        colorscale = color,
+        reversescale = reverse,
         marker = list(line = l),
         zmid = zmid,
         zmax = zmax,
         zmin = zmin
       ) %>%
       colorbar(
-        nticks = 10,
         len = 1,
         title = "",
         ticksuffix = " GHA"
