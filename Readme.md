@@ -21,3 +21,6 @@ The following R packages need to be installed in order to run this Shiny app:
 
 ## Notes
 - On some systems the maps visualization don't work in the built-in browser of RStudio. Make sure to open the Shiny App in your standard browser.
+
+## Team
+This was a team effort, done in collaboration with https://github.com/peizhehou, https://github.com/Roger-G, and myself https://github.com/luksurious
