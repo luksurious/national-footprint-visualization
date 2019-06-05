@@ -1,4 +1,6 @@
 library(plotly)
+#library(viridis)
+library(RColorBrewer)
 
 source("./number-format.R")
 
@@ -82,7 +84,7 @@ mapVisualizationUI <- function (id) {
     column(
       2, 
       radioButtons(ns("rangeCut"), "Min/Max of colorscale", choices = c(
-        "100% quant. (show extremes)" = 1, "99% quant. (show outliers)" = .99, "95% quant. (ignore outliers)" = .95), selected = .99)
+        "100% quant. (show extremes)" = "1", "99% quant. (show outliers)" = "0.99", "95% quant. (ignore outliers)" = "0.95"), selected = "0.99")
     ),
     column(
       3,
@@ -148,98 +150,66 @@ mapVisualization <- function (input, output, session) {
     cur_data
   })
   
-  sequentialColorscaleRed <- list(
-    list(0, "#fff5f0"),
-    list(0.05, "#fff5f0"),
-    list(0.05000001, "#fee0d2"),
-    list(0.11, "#fee0d2"),
-    list(0.11000001, "#fcbba1"),
-    list(0.22, "#fcbba1"),
-    list(0.22000001, "#fc9272"),
-    list(0.33, "#fc9272"),
-    list(0.33000001, "#fb6a4a"),
-    list(0.44, "#fb6a4a"),
-    list(0.44000001, "#ef3b2c"),
-    list(0.55, "#ef3b2c"),
-    list(0.55000001, "#cb181d"),
-    list(0.66, "#cb181d"),
-    list(0.66000001, "#a50f15"),
-    list(0.77, "#a50f15"),
-    list(0.77000001, "#67000d"),
-    list(1, "#67000d")
-  )
+  sequentialColorscale <- function (colormap) {
+    list(
+      list(0, colormap[1]),
+      list(0.03, colormap[1]),
+      list(0.03000001, colormap[2]),
+      list(0.08, colormap[2]),
+      list(0.08000001, colormap[3]),
+      list(0.15, colormap[3]),
+      list(0.15000001, colormap[4]),
+      list(0.25, colormap[4]),
+      list(0.25000001, colormap[5]),
+      list(0.36, colormap[5]),
+      list(0.36000001, colormap[6]),
+      list(0.47, colormap[6]),
+      list(0.47000001, colormap[7]),
+      list(0.60, colormap[7]),
+      list(0.60000001, colormap[8]),
+      list(0.77, colormap[8]),
+      list(0.77000001, colormap[9]),
+      list(1, colormap[9])
+    )
+  }
   
-  sequentialColorscaleGreen <- list(
-    list(0, "#f7fcf5"),
-    list(0.03, "#f7fcf5"),
-    list(0.03000001, "#e5f5e0"),
-    list(0.08, "#e5f5e0"),
-    list(0.08000001, "#c7e9c0"),
-    list(0.15, "#c7e9c0"),
-    list(0.15000001, "#a1d99b"),
-    list(0.25, "#a1d99b"),
-    list(0.25000001, "#74c476"),
-    list(0.36, "#74c476"),
-    list(0.36000001, "#41ab5d"),
-    list(0.47, "#41ab5d"),
-    list(0.47000001, "#238b45"),
-    list(0.60, "#238b45"),
-    list(0.60000001, "#006d2c"),
-    list(0.77, "#006d2c"),
-    list(0.77000001, "#00441b"),
-    list(1, "#00441b")
-  )
+  sequentialColorscaleGreen <- sequentialColorscale(brewer.pal(9, "Greens"))
+  sequentialColorscaleRed <- sequentialColorscale(brewer.pal(9, "Reds"))
+  
+  greenRedColorScale <- c(brewer.pal(11, "RdBu")[1:5], brewer.pal(11, "PRGn")[6:11])
+  greenPurpleColorScale <- brewer.pal(11, "PRGn")
+  #viridis10 = viridis(11)
   
   divergingColorscale <- reactive({
-    if (input$colorScaleED == 'green-red') {
-      list(
-        list(0, "#67001f"), 
-        list(0.1, "#67001f"),
-        list(0.10000001, "#b2182b"), 
-        list(0.25, "#b2182b"), 
-        list(0.25000001, "#d6604d"), 
-        list(0.35, "#d6604d"), 
-        list(0.35000001, "#f4a582"), 
-        list(0.45, "#f4a582"), 
-        list(0.45000001, "#fddbc7"), 
-        list(0.499, "#fddbc7"), 
-        list(0.5, "#F5F5F5"), 
-        list(0.501, "#d9f0d3"), 
-        list(0.54999999, "#d9f0d3"), 
-        list(0.55, "#a6dba0"),
-        list(0.64999999, "#a6dba0"),
-        list(0.65, "#5aae61"),
-        list(0.74999999, "#5aae61"),
-        list(0.75, "#1b7837"),
-        list(0.89999999, "#1b7837"),
-        list(0.9, "#00441b"),
-        list(1, "#00441b")
-      )
-    } else if (input$colorScaleED == 'continuous') {
+    if (input$colorScaleED == 'continuous') {
       list(list(0, "#CD0000"), list(0.495, "#F2BFBF"), list(0.5, "#F5F5F5"), list(0.505, "#D3DCC4"), list(1, "#517212"))
     } else {
+      colorMap <- switch(input$colorScaleED,
+                         "green-red" = greenRedColorScale,
+                         "green-purple" = greenPurpleColorScale)
+      
       list(
-        list(0, "#40004b"), 
-        list(0.1, "#40004b"),
-        list(0.10000001, "#762a83"), 
-        list(0.25, "#762a83"), 
-        list(0.25000001, "#9970ab"), 
-        list(0.35, "#9970ab"), 
-        list(0.35000001, "#c2a5cf"), 
-        list(0.45, "#c2a5cf"), 
-        list(0.45000001, "#e7d4e8"), 
-        list(0.499, "#e7d4e8"), 
-        list(0.5, "#F5F5F5"), 
-        list(0.501, "#d9f0d3"), 
-        list(0.54999999, "#d9f0d3"), 
-        list(0.55, "#a6dba0"),
-        list(0.64999999, "#a6dba0"),
-        list(0.65, "#5aae61"),
-        list(0.74999999, "#5aae61"),
-        list(0.75, "#1b7837"),
-        list(0.89999999, "#1b7837"),
-        list(0.9, "#00441b"),
-        list(1, "#00441b")
+        list(0, colorMap[1]), 
+        list(0.1, colorMap[1]),
+        list(0.10000001, colorMap[2]), 
+        list(0.25, colorMap[2]), 
+        list(0.25000001, colorMap[3]), 
+        list(0.35, colorMap[3]), 
+        list(0.35000001, colorMap[4]), 
+        list(0.45, colorMap[4]), 
+        list(0.45000001, colorMap[5]), 
+        list(0.499, colorMap[5]), 
+        list(0.5, colorMap[6]), 
+        list(0.501, colorMap[7]), 
+        list(0.54999999, colorMap[7]), 
+        list(0.55, colorMap[8]),
+        list(0.64999999, colorMap[8]),
+        list(0.65, colorMap[9]),
+        list(0.74999999, colorMap[9]),
+        list(0.75, colorMap[10]),
+        list(0.89999999, colorMap[10]),
+        list(0.9, colorMap[11]),
+        list(1, colorMap[11])
       )
     }
   })

@@ -82,17 +82,13 @@ countryCluster <- function (input, output, session) {
   
   
   output$plot1 <- renderPlotly({
-    palette <-
-      c(
-        '#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999'
-      )
+    palette <- c(brewer.pal(8, "Dark2"), "#80b1d3")
     clusters <- clusters()
     
     theData <-
       data.frame(selectedData(), cluster = factor(clusters$cluster))
     
     clusterCenters <- as.data.frame(clusters$centers)
-    
     
     plot_ly(theData, mode = "markers", type = "scatter",
             colors = palette[1:input$clusters]) %>%

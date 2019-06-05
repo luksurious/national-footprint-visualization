@@ -198,6 +198,14 @@ resourceComparison <- function (input, output, session) {
     }
   })
   
+  # generate here: http://vrl.cs.brown.edu/color
+  # change to rcolorbrewer?
+  
+  #firstColor <- "#256676"
+  #secondColor <- "#7FDC64"
+  set2 <- brewer.pal(3, "Set1")
+  firstColor <- set2[1]
+  secondColor <- set2[2]
   
   mergedComparisonData <- reactive({
     data1 <- resourceComparisonData1()
@@ -222,10 +230,13 @@ resourceComparison <- function (input, output, session) {
       y = as.formula(sprintf("~ %s.x", input$resourceType)),
       type = 'scatter',
       mode = 'lines+markers',
-      marker = list(size = 4)
+      line = list(color = firstColor),
+      marker = list(size = 4, color = firstColor)
     ) %>%
       add_trace(name = resourceComparisonRegion2(),
-                y = as.formula(sprintf("~ %s.y", input$resourceType))) %>%
+                y = as.formula(sprintf("~ %s.y", input$resourceType)),
+                line = list(color = secondColor),
+                marker = list(color = secondColor)) %>%
       layout(
         title = sprintf("%s Evolution of %s", input$recordType, input$resourceType),
         xaxis = list(title = "Year"),
@@ -273,7 +284,7 @@ resourceComparison <- function (input, output, session) {
       x = ~ value,
       y = ~ type,
       color = ~ region,
-      colors = 'Set1',
+      colors = setNames(c(firstColor, secondColor), c(resourceComparisonRegion1(), resourceComparisonRegion2())),
       type = "box"
     ) %>%
       layout(xaxis = list(title = paste0(input$recordType, " in GHA")),
@@ -343,10 +354,14 @@ resourceComparison <- function (input, output, session) {
       r = radarData1(),
       theta = theta,
       showlegend = FALSE,
+      line = list(color = firstColor),
+      marker = list(color = firstColor),
       mode = 'lines+markers',
       name = resourceComparisonRegion1()
     ) %>% add_trace(r = radarData2(),
                     theta = theta,
+                    line = list(color = secondColor),
+                    marker = list(color = secondColor),
                     name = resourceComparisonRegion2())
   })
   
@@ -378,9 +393,11 @@ resourceComparison <- function (input, output, session) {
       data = dataF,
       x = ~cols,
       y = ~ first,
+      marker = list(color = firstColor),
       name = resourceComparisonRegion1()
     ) %>% add_trace(
       y = ~ second,
+      marker = list(color = secondColor),
       name = resourceComparisonRegion2()
     ) %>% layout(
       yaxis = list(title = "Resource usage/availability in GHA"),
