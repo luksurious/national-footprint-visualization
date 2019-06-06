@@ -19,14 +19,14 @@ element1 <- select(
   ISO.alpha.3.code
 )
 
+element1 <- element1[element1$record == "EFConsTotGHA",]
 
-## Data preparation
-element2 <- (
-  element1 %>%
-    group_by(ISO.alpha.3.code, country, year) 
-)
+element2 <- (element1 %>%
+               group_by(ISO.alpha.3.code, country, year))
 
-element3 = aggregate(cbind(carbon) ~ UN_region + year, element1, FUN = sum)
+element3 <- aggregate(cbind(carbon) ~ UN_region + year, element1, FUN =
+                        sum)
+
 
 
 carbonEmissionsUI <- function (id) {
@@ -41,8 +41,9 @@ carbonEmissionsUI <- function (id) {
         selected = "Country and CO2 emission"
       ),
       conditionalPanel(
-        condition = "input.region == 'Country and CO2 emission'",
-        ns = ns,
+
+        condition = paste0("input['", ns("region"), "'] == 'Country and CO2 emission'"),
+
         selectInput(
           ns("countries1"),
           "Country1",
@@ -53,9 +54,11 @@ carbonEmissionsUI <- function (id) {
           ns("countries2"),
           "Country2",
           choices = dataCountries,
-          selected = "Africa"
+
+          selected = "United States of America"
+
         ),
-        #checkboxInput(ns("fit"), "Add line of best fit", FALSE),
+        
         fluidRow(column(
           5,
           radioButtons(
@@ -75,16 +78,19 @@ carbonEmissionsUI <- function (id) {
         ))
       ),
       conditionalPanel(
-        condition = "input.region == 'Continent and CO2 emission'",
-        ns = ns,
+
+        condition = paste0("input['", ns("region"), "'] == 'Continent and CO2 emission'"),
+
         selectInput(
           ns("continent1"),
           "Continent1",
           choices = dataRegions,
           selected = "Asia"
         ),
-        selectInput(ns("continent2"), "Continent2", choices = dataRegions),
-        #checkboxInput(ns("fit"), "Add line of best fit", FALSE),
+
+        selectInput(ns("continent2"), "Continent2", choices = dataRegions,selected = "North America"),
+        
+
         fluidRow(column(
           5,
           radioButtons(
@@ -104,23 +110,47 @@ carbonEmissionsUI <- function (id) {
           )
         ))
       ),
-      
-      # numericInput(ns("size"), "Point size", 1, 1),
+
       sliderInput(
         ns("years"),
         "Years",
         dataYears[1],
         dataYears[2],
-        value = c(1970, dataYears[2]),step=1,sep = "")
+
+        value = c(1970, dataYears[2]),
+        step = 1,
+        sep = "",
+        animate = animationOptions(interval = 300)
+      )
+      
+
       
     ),
     mainPanel(
       tabsetPanel(
         type = "tabs",
-        tabPanel("Comparison", h3("How did the total CO2 emissions in selected countries change?"), plotlyOutput(ns("plot_comparison"))),
-        tabPanel("Distribution", h3("What is the distribution of CO2 emissions in different continents?"), plotlyOutput(ns("plot_box"))),
-        tabPanel('Evolution', h3("What is the evolution of CO2 emissions?"), plotlyOutput(ns("plot_stream"))),
-        tabPanel('World CO2 emission map', h3("How do CO2 emissions change over the world over years?"), plotlyOutput(ns("map")))
+
+        tabPanel(
+          'World CO2 emission map',
+          h3("How does change of CO2 emission in the world over years  ?"),
+          plotlyOutput(ns("map"))
+        ),
+        tabPanel(
+          "Distribution",
+          h3("What is the trend of CO2 emission in different continents?"),
+          plotlyOutput(ns("plot_box"))
+        ),
+        tabPanel(
+          'Evolution',
+          h3("What is the revolution of CO2 emission ?"),
+          plotlyOutput(ns("plot_stream"))
+        ),
+        tabPanel(
+          "Comparision",
+          h3("How changes of total CO2 emission in two selected countries?"),
+          plotlyOutput(ns("plot_comparision"))
+        )
+
       )
     )
   ))
@@ -128,8 +158,9 @@ carbonEmissionsUI <- function (id) {
 
 
 carbonEmissions <- function (input, output, session) {
-  
-  output$plot_comparison <- renderPlotly({
+
+  output$plot_comparision <- renderPlotly({
+
     if (input$region == "Country and CO2 emission") {
       data1 <-
         subset(
@@ -142,6 +173,43 @@ carbonEmissions <- function (input, output, session) {
           element2,
           country %in% input$countries2 &
             year >= input$years[1] & year <= input$years[2]
+
+        )
+      data1 <- as.data.frame(data1)
+      data2 <- as.data.frame(data2)
+      ggplot(data1, aes(x = year, y = carbon / 1000000)) +
+        geom_line(
+          data = data1,
+          aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour
+        ) +
+        geom_point(
+          data = data1,
+          aes(x = year, y = carbon / 1000000),
+          size = 1,
+          col = input$colour
+        )+
+        geom_line(
+          data = data2,
+          aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour1
+        ) +
+        geom_point(
+          data = data2,
+          aes(x = year, y = carbon / 1000000),
+          size = 1,
+          col = input$colour1
+        ) +
+        ylab('Total Carbon Emission / M') +
+        ggtitle(
+          sprintf(
+            "CO2 Emission between %s and %s",
+            input$countries1,
+            input$countries2
+          )
+
         )
       data1<-as.data.frame(data1)
       data2<-as.data.frame(data2)
@@ -164,11 +232,39 @@ carbonEmissions <- function (input, output, session) {
           UN_region %in% input$continent2 &
             year >= input$years[1] & year <= input$years[2]
         )
-      ggplot(data1,aes(x=year,y=carbon/1000000))+
-        geom_line(data=data1,aes(x=year,y=carbon/1000000),size = 1,col = input$colour1_1) +
-        geom_line(data=data2,aes(x=year,y=carbon/1000000),size = 1,col = input$colour1_2) +
+
+      ggplot(data1, aes(x = year, y = carbon / 1000000)) +
+        geom_line(
+          data = data1,
+          aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour1_1
+        ) +
+        geom_point(
+          data = data1,
+          aes(x = year, y = carbon / 1000000),
+          size = 1,
+          col = input$colour1_1
+        ) +
+        geom_line(
+          data = data2,
+          aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour1_2
+        ) +
+        geom_point(
+          data = data2,
+          aes(x = year, y = carbon / 1000000),
+          size = 1,
+          col = input$colour1_2
+        ) +
         ylab('Total Carbon Emission / M') +
-        ggtitle(sprintf("Total CO2 emission in %s and %s",input$continent1,input$continent2))
+        ggtitle(sprintf(
+          "Total CO2 Emission in %s and %s",
+          input$continent1,
+          input$continent2
+        ))
+
     }
     
   })
@@ -188,47 +284,78 @@ carbonEmissions <- function (input, output, session) {
       ) %>%
       layout(title = sprintf("From %g to %g", input$years[1], input$years[2]))
     p
-    # add_trace(data2x=~year,y=~carbon,mode='point')
+    
   })
   output$plot_stream <- renderPlotly({
-    # box1<-subset(element3[element3$year>=input$years[1]|element3$year<=input$years[2],])
+
     box1 = Data1()
     
     (
       ggplot(box1 %>% filter(UN_region != 'World'), aes(year, carbon))
-      + geom_area(aes(fill = UN_region), alpha = 0.5)
+
+      + geom_area(
+        aes(fill = UN_region),
+        alpha = 0.5
+      )
+      + scale_fill_brewer(palette = "Set1")
       + ylab('Total Carbon Emissions')
-      + ggtitle(sprintf("From %g to %g", input$years[1], input$years[2]))
+      + ggtitle(sprintf(
+        "From %g to %g", input$years[1], input$years[2]
+      ))
+
     ) %>%
       ggplotly()
   })
   output$plot2 <- renderPlotly({
-    # box1<-subset(element3[element3$year>=input$years[1]|element3$year<=input$years[2],])
+    
     box1 = Data1()
     
     (
       ggplot(box1 %>% filter(UN_region != 'World'), aes(year, carbon))
       + geom_area(aes(fill = UN_region), alpha = 0.5)
       + ylab('Total Carbon Emissions')
-      + ggtitle(sprintf("From %g to %g", input$years[1], input$years[2]))
+
+      + ggtitle(sprintf(
+        "From %g to %g", input$years[1], input$years[2]
+      ))
+
     ) %>%
       ggplotly()
   })
   
+
+
   Data2<-reactive({
-    temp_data<-subset(element1,year>=input$years[1] & year<=input$years[2])
-    element_country<-(temp_data %>%
-                        group_by(ISO.alpha.3.code)%>%
-                        summarise(carbon=mean(carbon)))
     
+    element_temp<-(subset(aggregate(cbind(carbon) ~ ISO.alpha.3.code + year, element1, FUN =
+                                      sum),year>=input$years[1] & year<=input$years[2]) %>% aggregate(cbind(carbon) ~ ISO.alpha.3.code,.,FUN = sum))[-1,]
   })
   
   output$map <- renderPlotly({
-    data_map=Data2()
-    
-    data_map <- na.omit(data_map)
-    
-    # View(data_map)
+    data_map = Data2()
+    colorsdiverging <- list(
+      
+      list(0, "#fff5f0"),
+      list(0.125, "#fff5f0"),
+      list(0.1250000001, "#fee0d2"),
+      list(0.25, "#fee0d2"),
+      list(0.250000001, "#fcbba1"),
+      list(0.375, "#fcbba1"),
+      list(0.3750000001, "#fc9272"),
+      list(0.5, "#fc9272"),
+      list(0.50000001, "#fb6a4a"),
+      list(0.6250000000, "#fb6a4a"),
+      list(0.6250000001, "#ef3b2c"),
+      list(0.7500000000, "#ef3b2c"),
+      list(0.7500000001, "#cb181d"),
+      list(0.8250000000, "#cb181d"),
+      list(0.8250000001, "#99000d"),
+      list(1, "#99000d")
+      
+    )
+
+
+  
     # specify some map projection/options
     g <- list(
       scope = 'world',
@@ -238,7 +365,7 @@ carbonEmissions <- function (input, output, session) {
       showframe = FALSE,
       showcoastlines = FALSE
     )
-    
+
     l <- list(color = toRGB("grey"), width = 0.5)
     # create our plot
     plot_geo(data_map) %>%
@@ -246,11 +373,20 @@ carbonEmissions <- function (input, output, session) {
         z = ~ carbon,
         locations = ~ ISO.alpha.3.code,
         color = ~ carbon,
-        colors = "Blues",
+        colorscale = colorsdiverging,
         marker = list(line = l)
         
       ) %>%
-      layout(title=sprintf("Mean Carbon Emissions From %g to %g",input$years[1],input$years[2]) ,
-             geo = g)
+
+      colorbar(len = 1) %>%
+      layout(
+        title = sprintf(
+          "Total Carbon Emissions from %g to %g",
+          input$years[1],
+          input$years[2]
+        ) ,
+        geo = g
+      )
+
   })
 }
