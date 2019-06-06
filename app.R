@@ -19,7 +19,15 @@ source("./deficit.R", local = TRUE)
 source("./country-clusters.R", local = TRUE)
 
 # UI Definition
-ui <- navbarPage("National Footprint Visualization",
+ui <- navbarPage(
+  "National Footprint Visualization",
+  
+  #####################
+  # World map
+  #####################
+  tabPanel("Map",
+    mapVisualizationUI("map")
+  ),               
                  
   #####################
   # Biocapacity & Footprint
@@ -27,25 +35,18 @@ ui <- navbarPage("National Footprint Visualization",
   tabPanel("Biocapacity & Footprint", fluidPage(
 
     tabsetPanel(type = "tabs",
-                
-      #####################
-      # Biocapacity & Footprint trends
-      #####################
-      tabPanel("Trend",
+      tabPanel("History",
        br(),
        resourceTrendUI("bcTrend")
       ),
-  
-      #####################
-      # Biocapacity & Footprint comparison
-      #####################
+      
       tabPanel("Comparison", 
        br(),
        resourceComparisonUI("bcComp")
       ),
       
       tabPanel("Ecological Deficit",
-               deficitTrendUI("deficit")
+        deficitTrendUI("deficit")
       )
     ),
     br()
@@ -54,14 +55,11 @@ ui <- navbarPage("National Footprint Visualization",
   tabPanel("Carbon emissions",
     carbonEmissionsUI("carbon")
   ),
-  tabPanel("Map",
-    mapVisualizationUI("map")
+  tabPanel("Footprint clusters",
+    countryClusterUI("cluster")
   ),
   tabPanel("GDP vs Footprint",
     gdpVsEFUI("gdpVsEf")
-  ),
-  tabPanel("Footprint clusters",
-           countryClusterUI("cluster")
   )
 )
 

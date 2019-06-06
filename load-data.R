@@ -1,6 +1,6 @@
 
 # Load data
-rawData <- read.csv("data/NFA 2018.csv")
+rawData <- read.csv("data/NFA 2018.csv", encoding = "UTF-8")
 
 
 # Add ISO-2 country codes to data set

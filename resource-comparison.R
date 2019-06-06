@@ -15,6 +15,7 @@ resourceComparisonUI <- function (id) {
   
   tagList(sidebarLayout(
     sidebarPanel(
+      width = 3,
       radioButtons(
         ns("recordType"),
         label = "Data",
@@ -33,13 +34,13 @@ resourceComparisonUI <- function (id) {
         ns = ns,
         selectInput(
           ns("region1"),
-          label = "Choose the first region to show in the chart",
+          label = "First region to show in the chart",
           choices = dataRegions,
           selected = "Europe"
         ),
         selectInput(
           ns("region2"),
-          label = "Choose the first region to show in the chart",
+          label = "Second region to show in the chart",
           choices = dataRegions,
           selected = "Asia"
         )
@@ -49,13 +50,13 @@ resourceComparisonUI <- function (id) {
         ns = ns,
         selectInput(
           ns("country1"),
-          label = "Choose the first country to show in the chart",
+          label = "First country to show in the chart",
           choices = dataCountries,
           selected = "Spain"
         ),
         selectInput(
           ns("country2"),
-          label = "Choose the country to show in the chart",
+          label = "Second country to show in the chart",
           choices = dataCountries,
           selected = "Germany"
         )
@@ -110,19 +111,29 @@ resourceComparisonUI <- function (id) {
     ),
     
     mainPanel(
+      width = 9,
       tabsetPanel(
         tabPanel(
           'Trend',
                  
-           h2("How do different regions compare in their resources?"),
+           h2("How do different regions compare in their resource trends?"),
            br(),
            plotlyOutput(ns("resourceComparison"))
         ),
         tabPanel(
-          'Resource characteristics',
+          'Resource values',
           
-          h2("How do regions compare in their resources?"),
-          plotlyOutput(ns("resourceRadar"))
+          h2("How do regions compare in their resource values?"),
+          fluidRow(
+            column(
+              5,
+              plotlyOutput(ns("resourceRadar"))
+            ),
+            column(
+              7,
+              plotlyOutput(ns("resourceGroupBar"))
+            )
+          )
         ),
         tabPanel(
           'Distribution',
@@ -187,6 +198,14 @@ resourceComparison <- function (input, output, session) {
     }
   })
   
+  # generate here: http://vrl.cs.brown.edu/color
+  # change to rcolorbrewer?
+  
+  #firstColor <- "#256676"
+  #secondColor <- "#7FDC64"
+  set2 <- brewer.pal(3, "Set1")
+  firstColor <- set2[1]
+  secondColor <- set2[2]
   
   mergedComparisonData <- reactive({
     data1 <- resourceComparisonData1()
@@ -210,11 +229,14 @@ resourceComparison <- function (input, output, session) {
       name = resourceComparisonRegion1(),
       y = as.formula(sprintf("~ %s.x", input$resourceType)),
       type = 'scatter',
-      mode = 'lines'
+      mode = 'lines+markers',
+      line = list(color = firstColor),
+      marker = list(size = 4, color = firstColor)
     ) %>%
       add_trace(name = resourceComparisonRegion2(),
                 y = as.formula(sprintf("~ %s.y", input$resourceType)),
-                mode = 'lines') %>%
+                line = list(color = secondColor),
+                marker = list(color = secondColor)) %>%
       layout(
         title = sprintf("%s Evolution of %s", input$recordType, input$resourceType),
         xaxis = list(title = "Year"),
@@ -262,7 +284,7 @@ resourceComparison <- function (input, output, session) {
       x = ~ value,
       y = ~ type,
       color = ~ region,
-      colors = 'Set1',
+      colors = setNames(c(firstColor, secondColor), c(resourceComparisonRegion1(), resourceComparisonRegion2())),
       type = "box"
     ) %>%
       layout(xaxis = list(title = paste0(input$recordType, " in GHA")),
@@ -331,10 +353,55 @@ resourceComparison <- function (input, output, session) {
       type = 'scatterpolar',
       r = radarData1(),
       theta = theta,
+      showlegend = FALSE,
+      line = list(color = firstColor),
+      marker = list(color = firstColor),
       mode = 'lines+markers',
       name = resourceComparisonRegion1()
     ) %>% add_trace(r = radarData2(),
                     theta = theta,
+                    line = list(color = secondColor),
+                    marker = list(color = secondColor),
                     name = resourceComparisonRegion2())
+  })
+  
+  output$resourceGroupBar <- renderPlotly({
+    cols <- c(
+      'crop_land',
+      'forest_land',
+      'fishing_ground',
+      'grazing_land',
+      'built_up_land',
+      'crop_land'
+    )
+    if (input$recordType == 'Footprint') {
+      cols <-
+        c(
+          'crop_land',
+          'forest_land',
+          'fishing_ground',
+          'grazing_land',
+          'built_up_land',
+          'carbon',
+          'crop_land'
+        )
+    }
+    dataF <- data.frame(cols, first = radarData1(), second = radarData2())
+    
+    plot_ly(
+      type = 'bar',
+      data = dataF,
+      x = ~cols,
+      y = ~ first,
+      marker = list(color = firstColor),
+      name = resourceComparisonRegion1()
+    ) %>% add_trace(
+      y = ~ second,
+      marker = list(color = secondColor),
+      name = resourceComparisonRegion2()
+    ) %>% layout(
+      yaxis = list(title = "Resource usage/availability in GHA"),
+      xaxis = list(title = "Resource type")
+    )
   })
 }

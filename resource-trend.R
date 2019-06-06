@@ -65,7 +65,7 @@ resourceTrendUI <- function (id) {
       mainPanel(
         tabsetPanel(
           tabPanel(
-            'Over time',
+            'Trend',
             
             h2("Are there different trends in the evolution of the different resources?"),
             plotlyOutput(ns("plot"))
@@ -97,6 +97,8 @@ resourceTrend <- function (input, output, session) {
     }
   })  
   
+  colors <- brewer.pal(7, "Dark2")
+  
   output$plot <- renderPlotly({
     p <-
       plot_ly(
@@ -104,32 +106,39 @@ resourceTrend <- function (input, output, session) {
         x = ~ year,
         name = 'crop land',
         y = ~ crop_land,
+        marker = list(color = colors[1], size = 4),
+        line = list(color = colors[1]),
         type = 'scatter',
-        mode = 'lines'
+        mode = 'lines+markers'
       ) %>%
       add_trace(y = ~ grazing_land,
-                name = 'grazing land',
-                mode = 'lines') %>%
+                marker = list(color = colors[2]),
+                line = list(color = colors[2]),
+                name = 'grazing land') %>%
       add_trace(y = ~ forest_land,
-                name = 'forest land',
-                mode = 'lines') %>%
+                marker = list(color = colors[3]),
+                line = list(color = colors[3]),
+                name = 'forest land') %>%
       add_trace(y = ~ fishing_ground,
-                name = 'fishing ground',
-                mode = 'lines') %>%
+                marker = list(color = colors[4]),
+                line = list(color = colors[4]),
+                name = 'fishing ground') %>%
       add_trace(y = ~ built_up_land,
-                name = 'built up land',
-                mode = 'lines') %>%
+                marker = list(color = colors[5]),
+                line = list(color = colors[5]),
+                name = 'built up land') %>%
       layout(
         title = paste0("Total ", input$recordType, " Development"),
         xaxis = list(title = "Year"),
-        yaxis = list (title = paste0(input$recordType, " in global hectares"))
+        yaxis = list(title = paste0(input$recordType, " in global hectares"))
       )
     
     if (input$recordType == 'Footprint') {
       p <- add_trace(
         y = ~ carbon,
         name = 'carbon emissions',
-        mode = 'lines',
+        marker = list(color = colors[7]),
+        line = list(color = colors[7]),
         p = p
       )
     }
@@ -137,7 +146,8 @@ resourceTrend <- function (input, output, session) {
       p = p,
       y = ~ total,
       name = 'total',
-      mode = 'lines',
+      marker = list(color = colors[6]),
+      line = list(color = colors[6]),
       visible = "legendonly"
     )
     

@@ -1,11 +1,9 @@
+############################
+# Author: Peizhe Hou
+############################
 
-
-footprintTotal <-
-  rawData[rawData$country != 'World' &
-            rawData$record == "EFConsTotGHA", ]
-footprintPerPerson <-
-  rawData[rawData$country != 'World' &
-            rawData$record == "EFConsPerCap", ]
+footprintTotal <- totalFootprintPerCountry[totalFootprintPerCountry$country != 'World', ]
+footprintPerPerson <- capitaFootprintPerCountry[capitaFootprintPerCountry$country != 'World', ]
 
 countryClusterUI <- function (id) {
   ns <- NS(id)
@@ -84,18 +82,7 @@ countryCluster <- function (input, output, session) {
   
   
   output$plot1 <- renderPlotly({
-    palette <-
-      c(
-        "#EA2027",
-        "#0652DD",
-        "#FFC312",
-        "#009432",
-        "#FDA7DF",
-        "#1B1464",
-        "#C4E538",
-        "#6F1E51",
-        "#12CBC4"
-      )
+    palette <- c(brewer.pal(8, "Dark2"), "#80b1d3")
     clusters <- clusters()
     
     theData <-
@@ -103,8 +90,8 @@ countryCluster <- function (input, output, session) {
     
     clusterCenters <- as.data.frame(clusters$centers)
     
-    
-    plot_ly(theData, mode = "markers", type = "scatter") %>%
+    plot_ly(theData, mode = "markers", type = "scatter",
+            colors = palette[1:input$clusters]) %>%
       add_trace(
         data = theData,
         x = as.formula(paste0("~", input$xcol)),

@@ -1,3 +1,8 @@
+############################
+# Author: Jie Gao (Roger-G)
+# https://github.com/Roger-G/national-footprint-visualization
+############################
+
 library(shiny)
 library(dplyr)
 library(ggplot2)
@@ -22,7 +27,7 @@ element2 <- (element1 %>%
                group_by(ISO.alpha.3.code, country, year))
 
 element3 <- aggregate(cbind(carbon) ~ UN_region + year, element1, FUN =
-                       sum)
+                        sum)
 
 
 carbonEmissionsUI <- function (id) {
@@ -234,7 +239,7 @@ carbonEmissions <- function (input, output, session) {
     
   })
   output$plot_stream <- renderPlotly({
-  
+    
     box1 = Data1()
     
     (
@@ -253,7 +258,7 @@ carbonEmissions <- function (input, output, session) {
       ggplotly()
   })
   output$plot2 <- renderPlotly({
-  
+    
     box1 = Data1()
     
     (
@@ -267,29 +272,18 @@ carbonEmissions <- function (input, output, session) {
       ggplotly()
   })
   
-  # tem_data<- subset(aggregate(cbind(carbon) ~ ISO.alpha.3.code + year, element1, FUN =
-  #                    sum),year>=input$years[1] & year<=input$years[2])
-  # View(tem_data)
 
-  # View(country_year)
   Data2<-reactive({
     
     element_temp<-(subset(aggregate(cbind(carbon) ~ ISO.alpha.3.code + year, element1, FUN =
-                                         sum),year>=input$years[1] & year<=input$years[2]) %>% aggregate(cbind(carbon) ~ ISO.alpha.3.code,.,FUN = sum))[-1,]
+                                      sum),year>=input$years[1] & year<=input$years[2]) %>% aggregate(cbind(carbon) ~ ISO.alpha.3.code,.,FUN = sum))[-1,]
   })
   
   output$map <- renderPlotly({
     data_map = Data2()
     View(data_map)
     colorsdiverging <- list(
-      #f7fcfd
-      #e0ecf4
-      #bfd3e6
-      #9ebcda
-      #8c96c6
-      #8c6bb1
-      #88419d
-      #6e016b
+
       list(0, "#f7fcfd"),
       list(0.125, "#f7fcfd"),
       list(0.1250000001, "#e0ecf4"),
@@ -308,7 +302,7 @@ carbonEmissions <- function (input, output, session) {
       list(1, "#6e016b")
       
     )
-    # View(data_map)
+
     # specify some map projection/options
     g <- list(
       scope = 'world',
