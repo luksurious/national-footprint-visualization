@@ -334,23 +334,23 @@ carbonEmissions <- function (input, output, session) {
   output$map <- renderPlotly({
     data_map = Data2()
     colorsdiverging <- list(
-
-      list(0, "#f7fcfd"),
-      list(0.125, "#f7fcfd"),
-      list(0.1250000001, "#e0ecf4"),
-      list(0.25, "#e0ecf4"),
-      list(0.250000001, "#bfd3e6"),
-      list(0.375, "#bfd3e6"),
-      list(0.3750000001, "#9ebcda"),
-      list(0.5, "#9ebcda"),
-      list(0.50000001, "#8c96c6"),
-      list(0.6250000000, "#8c96c6"),
-      list(0.6250000001, "#8c6bb1"),
-      list(0.7500000000, "#8c6bb1"),
-      list(0.7500000001, "#88419d"),
-      list(0.8250000000, "#88419d"),
-      list(0.8250000001, "#6e016b"),
-      list(1, "#6e016b")
+      
+      list(0, "#fff5f0"),
+      list(0.125, "#fff5f0"),
+      list(0.1250000001, "#fee0d2"),
+      list(0.25, "#fee0d2"),
+      list(0.250000001, "#fcbba1"),
+      list(0.375, "#fcbba1"),
+      list(0.3750000001, "#fc9272"),
+      list(0.5, "#fc9272"),
+      list(0.50000001, "#fb6a4a"),
+      list(0.6250000000, "#fb6a4a"),
+      list(0.6250000001, "#ef3b2c"),
+      list(0.7500000000, "#ef3b2c"),
+      list(0.7500000001, "#cb181d"),
+      list(0.8250000000, "#cb181d"),
+      list(0.8250000001, "#99000d"),
+      list(1, "#99000d")
       
     )
 
