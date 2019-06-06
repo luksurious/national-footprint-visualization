@@ -103,12 +103,8 @@ carbonEmissionsUI <- function (id) {
           )
         ))
       ),
-      
-      radioButtons(ns("yearMode"), label = "Year or time range", choices = c("Time range", "Year"), selected = "Time range"),
-      conditionalPanel(
-        condition="input.yearMode=='Time range'",
-        ns=ns,
-        sliderInput(
+
+      sliderInput(
         ns("years"),
         "Years",
         dataYears[1],
@@ -117,20 +113,8 @@ carbonEmissionsUI <- function (id) {
         step = 1,
         sep = "",
         animate = animationOptions(interval = 300)
-      )),
-      conditionalPanel(
-        condition="input.yearMode=='Year'",
-        ns=ns,
-        sliderInput(
-        ns("years"),
-        "Years",
-        dataYears[1],
-        dataYears[2],
-        value = dataYears[2],
-        step = 1,
-        sep = "",
-        animate = animationOptions(interval = 300)
-      ))
+      )
+      
       
     ),
     mainPanel(
