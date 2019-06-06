@@ -53,7 +53,7 @@ carbonEmissionsUI <- function (id) {
           ns("countries2"),
           "Country2",
           choices = dataCountries,
-          selected = "Africa"
+          selected = "United States of America"
         ),
         
         fluidRow(column(
@@ -82,7 +82,7 @@ carbonEmissionsUI <- function (id) {
           choices = dataRegions,
           selected = "Asia"
         ),
-        selectInput(ns("continent2"), "Continent2", choices = dataRegions),
+        selectInput(ns("continent2"), "Continent2", choices = dataRegions,selected = "North America"),
         
         fluidRow(column(
           5,
@@ -104,8 +104,11 @@ carbonEmissionsUI <- function (id) {
         ))
       ),
       
-      
-      sliderInput(
+      radioButtons(ns("yearMode"), label = "Year or time range", choices = c("Time range", "Year"), selected = "Time range"),
+      conditionalPanel(
+        condition="input.yearMode=='Time range'",
+        ns=ns,
+        sliderInput(
         ns("years"),
         "Years",
         dataYears[1],
@@ -114,7 +117,20 @@ carbonEmissionsUI <- function (id) {
         step = 1,
         sep = "",
         animate = animationOptions(interval = 300)
-      )
+      )),
+      conditionalPanel(
+        condition="input.yearMode=='Year'",
+        ns=ns,
+        sliderInput(
+        ns("years"),
+        "Years",
+        dataYears[1],
+        dataYears[2],
+        value = dataYears[2],
+        step = 1,
+        sep = "",
+        animate = animationOptions(interval = 300)
+      ))
       
     ),
     mainPanel(
@@ -167,10 +183,22 @@ carbonEmissions <- function (input, output, session) {
         geom_line(
           data = data1,
           aes(x = year, y = carbon / 1000000),
-          size = 1,
+          size = 0.6,
           col = input$colour
         ) +
+        geom_point(
+          data = data1,
+          aes(x = year, y = carbon / 1000000),
+          size = 1,
+          col = input$colour
+        )+
         geom_line(
+          data = data2,
+          aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour1
+        ) +
+        geom_point(
           data = data2,
           aes(x = year, y = carbon / 1000000),
           size = 1,
@@ -202,10 +230,22 @@ carbonEmissions <- function (input, output, session) {
         geom_line(
           data = data1,
           aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour1_1
+        ) +
+        geom_point(
+          data = data1,
+          aes(x = year, y = carbon / 1000000),
           size = 1,
           col = input$colour1_1
         ) +
         geom_line(
+          data = data2,
+          aes(x = year, y = carbon / 1000000),
+          size = 0.6,
+          col = input$colour1_2
+        ) +
+        geom_point(
           data = data2,
           aes(x = year, y = carbon / 1000000),
           size = 1,
@@ -246,8 +286,7 @@ carbonEmissions <- function (input, output, session) {
       ggplot(box1 %>% filter(UN_region != 'World'), aes(year, carbon))
       + geom_area(
         aes(fill = UN_region),
-        alpha = 0.5,
-        colours = 'Set1'
+        alpha = 0.5
       )
       + scale_fill_brewer(palette = "Set1")
       + ylab('Total Carbon Emissions')
@@ -281,7 +320,6 @@ carbonEmissions <- function (input, output, session) {
   
   output$map <- renderPlotly({
     data_map = Data2()
-    View(data_map)
     colorsdiverging <- list(
 
       list(0, "#f7fcfd"),
@@ -312,7 +350,7 @@ carbonEmissions <- function (input, output, session) {
       showframe = FALSE,
       showcoastlines = FALSE
     )
-    print("test")
+
     l <- list(color = toRGB("grey"), width = 0.5)
     # create our plot
     plot_geo(data_map) %>%
