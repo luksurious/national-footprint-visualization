@@ -38,11 +38,11 @@ carbonEmissionsUI <- function (id) {
       selectInput(
         ns("region"),
         label = "Choose the two objects to compare",
-        choices = list("Country and CO2 commision", "Continent and CO2 commision"),
-        selected = "Country and CO2 commision"
+        choices = list("Country and CO2 emission", "Continent and CO2 emission"),
+        selected = "Country and CO2 emission"
       ),
       conditionalPanel(
-        condition = paste0("input['", ns("region"), "'] == 'Country and CO2 commision'"),
+        condition = paste0("input['", ns("region"), "'] == 'Country and CO2 emission'"),
         selectInput(
           ns("countries1"),
           "Country1",
@@ -75,7 +75,7 @@ carbonEmissionsUI <- function (id) {
         ))
       ),
       conditionalPanel(
-        condition = paste0("input['", ns("region"), "'] == 'Continent and CO2 commision'"),
+        condition = paste0("input['", ns("region"), "'] == 'Continent and CO2 emission'"),
         selectInput(
           ns("continent1"),
           "Continent1",
@@ -148,7 +148,7 @@ carbonEmissionsUI <- function (id) {
 
 carbonEmissions <- function (input, output, session) {
   output$plot_comparision <- renderPlotly({
-    if (input$region == "Country and CO2 commision") {
+    if (input$region == "Country and CO2 emission") {
       data1 <-
         subset(
           element2,
@@ -191,13 +191,13 @@ carbonEmissions <- function (input, output, session) {
         ylab('Total Carbon Emission / M') +
         ggtitle(
           sprintf(
-            "How changes of total CO2 commision between %s and %s ?",
+            "CO2 Emission between %s and %s",
             input$countries1,
             input$countries2
           )
         )
     }
-    else if (input$region == "Continent and CO2 commision") {
+    else if (input$region == "Continent and CO2 emission") {
       data1 <-
         subset(
           element3,
@@ -237,7 +237,7 @@ carbonEmissions <- function (input, output, session) {
         ) +
         ylab('Total Carbon Emission / M') +
         ggtitle(sprintf(
-          "Total CO2 commision in %s and %s",
+          "Total CO2 Emission in %s and %s",
           input$continent1,
           input$continent2
         ))
@@ -349,7 +349,7 @@ carbonEmissions <- function (input, output, session) {
       colorbar(len = 1) %>%
       layout(
         title = sprintf(
-          "Mean Carbon Emissions From %g to %g",
+          "Total Carbon Emissions from %g to %g",
           input$years[1],
           input$years[2]
         ) ,
