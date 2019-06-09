@@ -217,29 +217,7 @@ carbonEmissions <- function (input, output, session) {
           input$countries1,
           input$countries2
         ))
-      data1 <- as.data.frame(data1)
-      data2 <- as.data.frame(data2)
-      ggplot(data1, aes(x = year, y = carbon / 1000000)) +
-        geom_line(
-          data = data1,
-          aes(x = year, y = carbon / 1000000),
-          size = 1,
-          col = input$colour
-        ) +
-        geom_line(
-          data = data2,
-          aes(x = year, y = carbon / 1000000),
-          size = 1,
-          col = input$colour1
-        ) +
-        ylab('Total Carbon Emission / M') +
-        ggtitle(
-          sprintf(
-            "How changes of total CO2 emission between %s and %s ?",
-            input$countries1,
-            input$countries2
-          )
-        )
+     
     }
     else if (input$region == "Continent and CO2 emission") {
       data1 <-
@@ -325,24 +303,7 @@ carbonEmissions <- function (input, output, session) {
     ) %>%
       ggplotly()
   })
-  output$plot2 <- renderPlotly({
-    box1 = Data1()
-    
-    (
-      ggplot(box1 %>% filter(UN_region != 'World'), aes(year, carbon))
-      + geom_area(aes(fill = UN_region), alpha = 0.5)
-      + ylab('Total Carbon Emissions')
-      
-      + ggtitle(sprintf(
-        "From %g to %g", input$years[1], input$years[2]
-      ))
-      
-    ) %>%
-      ggplotly()
-  })
-  
-  
-  
+ 
   Data2 <- reactive({
     element_temp <-
       (
