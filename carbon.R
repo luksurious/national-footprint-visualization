@@ -147,13 +147,13 @@ carbonEmissionsUI <- function (id) {
         tabPanel(
           "Distribution",
           h3(
-            "How do continents share of total CO2 emissions evolve?"
+            "What is the distribution of CO2 emissions in different continents?"
           ),
           plotlyOutput(ns("plot_box"))
         ),
         tabPanel(
           'Evolution',
-          h3("What is the evolution of CO2 emission ?"),
+          h3("How do continents share of total CO2 emissions evolve?"),
           plotlyOutput(ns("plot_area"))
         ),
         tabPanel(
@@ -318,29 +318,8 @@ carbonEmissions <- function (input, output, session) {
   
   output$map <- renderPlotly({
     data_map = Data2()
-    colors <- list(
-      list(0, "#fff7ec"),
-      list(0.03, "#fff7ec"),
-      list(0.03000001, "#fee8c8"),
-      list(0.08, "#fee8c8"),
-      list(0.08000001, "#fdd49e"),
-      list(0.15, "#fdd49e"),
-      list(0.15000001, " #fdbb84"),
-      list(0.25, " #fdbb84"),
-      list(0.25000001, "#fc8d59"),
-      list(0.36, "#fc8d59"),
-      list(0.36000001, "#ef6548"),
-      list(0.47, "#ef6548"),
-      list(0.47000001, "#d7301f"),
-      list(0.60, "#d7301f"),
-      list(0.60000001, "#b30000"),
-      list(0.77, "#b30000"),
-      list(0.77000001, "#7f0000"),
-      list(1, "#7f0000")
-      
-    )
     
-    #colormap <- sequentialColorscale(sequentialReds9)
+    colors <- sequentialColorscale(brewer.pal(9, "OrRd"))
     
     ticks <-
       c(0, as.numeric(matrix(
