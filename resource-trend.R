@@ -59,6 +59,12 @@ resourceTrendUI <- function (id) {
           ),
           sep = "",
           step = 1
+        ),
+        
+        radioButtons(
+          ns("colors"),
+          "Color scheme",
+          choices = c("Colorbrewer Dark2" = "Dark2", "Plotly defaults" = "plotly")
         )
       ),
       
@@ -97,9 +103,15 @@ resourceTrend <- function (input, output, session) {
     }
   })  
   
-  colors <- brewer.pal(7, "Dark2")
+  getColors <- reactive({
+    switch(input$colors,
+           "Dark2" = categoricalDark2Colors8[1:7],
+           "plotly" = plotlyColors[1:7])
+  })
   
   output$plot <- renderPlotly({
+    colors <- getColors()
+    
     p <-
       plot_ly(
         resourceTrendData(),

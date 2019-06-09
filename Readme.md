@@ -14,7 +14,8 @@ The following R packages need to be installed in order to run this Shiny app:
 * plotly >= 4.9.0
 * dplyr
 * ggplot2
-* tidyverse
+* purrr
+* RColorBrewer
 
 ## Set up
 1. Download the dataset from https://www.kaggle.com/footprintnetwork/national-footprint-accounts-2018

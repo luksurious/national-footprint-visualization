@@ -15,7 +15,6 @@ resourceComparisonUI <- function (id) {
   
   tagList(sidebarLayout(
     sidebarPanel(
-      width = 3,
       radioButtons(
         ns("recordType"),
         label = "Data",
@@ -34,13 +33,13 @@ resourceComparisonUI <- function (id) {
         ns = ns,
         selectInput(
           ns("region1"),
-          label = "First region to show in the chart",
+          label = "First region",
           choices = dataRegions,
           selected = "Europe"
         ),
         selectInput(
           ns("region2"),
-          label = "Second region to show in the chart",
+          label = "Second region",
           choices = dataRegions,
           selected = "Asia"
         )
@@ -50,13 +49,13 @@ resourceComparisonUI <- function (id) {
         ns = ns,
         selectInput(
           ns("country1"),
-          label = "First country to show in the chart",
+          label = "First country",
           choices = dataCountries,
           selected = "Spain"
         ),
         selectInput(
           ns("country2"),
-          label = "Second country to show in the chart",
+          label = "Second country",
           choices = dataCountries,
           selected = "Germany"
         )
@@ -81,7 +80,7 @@ resourceComparisonUI <- function (id) {
       ),
       
       conditionalPanel(
-        condition = "input.resCompTab == 'Resource characteristics'",
+        condition = "input.resCompTab == 'Resource values'",
         ns = ns,
         sliderInput(
           ns("year"),
@@ -95,7 +94,7 @@ resourceComparisonUI <- function (id) {
         )
       ),
       conditionalPanel(
-        condition = "input.resCompTab != 'Resource characteristics'",
+        condition = "input.resCompTab != 'Resource values'",
         ns = ns,
         sliderInput(
           ns("years"),
@@ -107,11 +106,16 @@ resourceComparisonUI <- function (id) {
           sep = "",
           step = 1
         )
+      ),
+      
+      radioButtons(
+        ns("colors"),
+        "Color set",
+        choices = c("Colorbrewer Set2" = "Set2", "Colorbrewer Dark2" = "Dark2", "Plotly defaults" = "plotly")
       )
     ),
     
     mainPanel(
-      width = 9,
       tabsetPanel(
         tabPanel(
           'Trend',
@@ -198,14 +202,13 @@ resourceComparison <- function (input, output, session) {
     }
   })
   
-  # generate here: http://vrl.cs.brown.edu/color
-  # change to rcolorbrewer?
-  
-  #firstColor <- "#256676"
-  #secondColor <- "#7FDC64"
-  set2 <- brewer.pal(3, "Set1")
-  firstColor <- set2[1]
-  secondColor <- set2[2]
+  colors <- reactive({
+    switch (input$colors,
+            "Set2" = categoricalSet2Colors9[1:2],
+            "Dark2" = categoricalDark2Colors8[1:2],
+            "plotly" = plotlyColors[1:2]
+    )
+  })
   
   mergedComparisonData <- reactive({
     data1 <- resourceComparisonData1()
@@ -222,6 +225,7 @@ resourceComparison <- function (input, output, session) {
   
   output$resourceComparison <- renderPlotly({
     comparison_data <- mergedComparisonData()
+    colors <- colors()
     
     plot_ly(
       comparison_data,
@@ -230,13 +234,13 @@ resourceComparison <- function (input, output, session) {
       y = as.formula(sprintf("~ %s.x", input$resourceType)),
       type = 'scatter',
       mode = 'lines+markers',
-      line = list(color = firstColor),
-      marker = list(size = 4, color = firstColor)
+      line = list(color = colors[1]),
+      marker = list(size = 4, color = colors[1])
     ) %>%
       add_trace(name = resourceComparisonRegion2(),
                 y = as.formula(sprintf("~ %s.y", input$resourceType)),
-                line = list(color = secondColor),
-                marker = list(color = secondColor)) %>%
+                line = list(color = colors[2]),
+                marker = list(color = colors[2])) %>%
       layout(
         title = sprintf("%s Evolution of %s", input$recordType, input$resourceType),
         xaxis = list(title = "Year"),
@@ -279,12 +283,13 @@ resourceComparison <- function (input, output, session) {
   })
   
   output$resourceDistribution <- renderPlotly({
+    colors <- colors()
     plot_ly(
       distributionData(),
       x = ~ value,
       y = ~ type,
       color = ~ region,
-      colors = setNames(c(firstColor, secondColor), c(resourceComparisonRegion1(), resourceComparisonRegion2())),
+      colors = setNames(c(colors[1], colors[2]), c(resourceComparisonRegion1(), resourceComparisonRegion2())),
       type = "box"
     ) %>%
       layout(xaxis = list(title = paste0(input$recordType, " in GHA")),
@@ -348,20 +353,21 @@ resourceComparison <- function (input, output, session) {
           'crop_land'
         )
     }
+    colors <- colors()
     
     plot_ly(
       type = 'scatterpolar',
       r = radarData1(),
       theta = theta,
       showlegend = FALSE,
-      line = list(color = firstColor),
-      marker = list(color = firstColor),
+      line = list(color = colors[1]),
+      marker = list(color = colors[1]),
       mode = 'lines+markers',
       name = resourceComparisonRegion1()
     ) %>% add_trace(r = radarData2(),
                     theta = theta,
-                    line = list(color = secondColor),
-                    marker = list(color = secondColor),
+                    line = list(color = colors[2]),
+                    marker = list(color = colors[2]),
                     name = resourceComparisonRegion2())
   })
   
@@ -387,21 +393,26 @@ resourceComparison <- function (input, output, session) {
         )
     }
     dataF <- data.frame(cols, first = radarData1(), second = radarData2())
+    colors <- colors()
+    
+    dataF$cols = with(dataF, factor(cols, levels = rev(levels(cols))))
     
     plot_ly(
       type = 'bar',
+      orientation = 'h',
       data = dataF,
-      x = ~cols,
-      y = ~ first,
-      marker = list(color = firstColor),
+      y = ~ cols,
+      x = ~ first,
+      marker = list(color = colors[1]),
       name = resourceComparisonRegion1()
     ) %>% add_trace(
-      y = ~ second,
-      marker = list(color = secondColor),
+      x = ~ second,
+      marker = list(color = colors[2]),
       name = resourceComparisonRegion2()
     ) %>% layout(
-      yaxis = list(title = "Resource usage/availability in GHA"),
-      xaxis = list(title = "Resource type")
+      xaxis = list(title = "Resource usage/availability in GHA"),
+      yaxis = list(title = "Resource type"),
+      legend = list(orientation = 'h', y = 100, xanchor = 'left')
     )
   })
 }

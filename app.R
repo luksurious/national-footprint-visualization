@@ -5,6 +5,7 @@ source("./load-data.R", local = TRUE)
 source("./prepare-data.R", local = TRUE)
 
 # Load modules
+source("./colors.R", local = TRUE)
 source("./resource-trend.R", local = TRUE)
 source("./resource-comparison.R", local = TRUE)
 

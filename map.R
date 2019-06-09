@@ -1,6 +1,4 @@
 library(plotly)
-#library(viridis)
-library(RColorBrewer)
 
 source("./number-format.R")
 
@@ -150,67 +148,19 @@ mapVisualization <- function (input, output, session) {
     cur_data
   })
   
-  sequentialColorscale <- function (colormap) {
-    list(
-      list(0, colormap[1]),
-      list(0.03, colormap[1]),
-      list(0.03000001, colormap[2]),
-      list(0.08, colormap[2]),
-      list(0.08000001, colormap[3]),
-      list(0.15, colormap[3]),
-      list(0.15000001, colormap[4]),
-      list(0.25, colormap[4]),
-      list(0.25000001, colormap[5]),
-      list(0.36, colormap[5]),
-      list(0.36000001, colormap[6]),
-      list(0.47, colormap[6]),
-      list(0.47000001, colormap[7]),
-      list(0.60, colormap[7]),
-      list(0.60000001, colormap[8]),
-      list(0.77, colormap[8]),
-      list(0.77000001, colormap[9]),
-      list(1, colormap[9])
-    )
-  }
+  sequentialColorscaleGreen <- sequentialColorscale(sequentialGreens9)
+  sequentialColorscaleRed <- sequentialColorscale(sequentialReds9)
   
-  sequentialColorscaleGreen <- sequentialColorscale(brewer.pal(9, "Greens"))
-  sequentialColorscaleRed <- sequentialColorscale(brewer.pal(9, "Reds"))
-  
-  greenRedColorScale <- c(brewer.pal(11, "RdBu")[1:5], brewer.pal(11, "PRGn")[6:11])
-  greenPurpleColorScale <- brewer.pal(11, "PRGn")
-  #viridis10 = viridis(11)
+  divergingContinuousColorscale <- divergingContinuousColorscale(divergingContinuousGreenRedSemanticColorScale)
   
   divergingColorscale <- reactive({
     if (input$colorScaleED == 'continuous') {
-      list(list(0, "#CD0000"), list(0.495, "#F2BFBF"), list(0.5, "#F5F5F5"), list(0.505, "#D3DCC4"), list(1, "#517212"))
+      divergingContinuousColorscale
     } else {
       colorMap <- switch(input$colorScaleED,
-                         "green-red" = greenRedColorScale,
-                         "green-purple" = greenPurpleColorScale)
-      
-      list(
-        list(0, colorMap[1]), 
-        list(0.1, colorMap[1]),
-        list(0.10000001, colorMap[2]), 
-        list(0.25, colorMap[2]), 
-        list(0.25000001, colorMap[3]), 
-        list(0.35, colorMap[3]), 
-        list(0.35000001, colorMap[4]), 
-        list(0.45, colorMap[4]), 
-        list(0.45000001, colorMap[5]), 
-        list(0.499, colorMap[5]), 
-        list(0.5, colorMap[6]), 
-        list(0.501, colorMap[7]), 
-        list(0.54999999, colorMap[7]), 
-        list(0.55, colorMap[8]),
-        list(0.64999999, colorMap[8]),
-        list(0.65, colorMap[9]),
-        list(0.74999999, colorMap[9]),
-        list(0.75, colorMap[10]),
-        list(0.89999999, colorMap[10]),
-        list(0.9, colorMap[11]),
-        list(1, colorMap[11])
-      )
+                         "green-red" = divergingGreenRedSemanticColorScale11,
+                         "green-purple" = divergingGreenPurpleColorScale11)
+      divergingSegmentedColorscale(colorMap)
     }
   })
   

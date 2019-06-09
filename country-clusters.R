@@ -79,26 +79,28 @@ countryCluster <- function (input, output, session) {
     
     kmeans(clusterData[, c(input$xcol, input$ycol)], input$clusters)
   })
-  
+
+  palette <- reactive({
+    categoricalDark2ExColors9[1:input$clusters]
+  })  
   
   output$plot1 <- renderPlotly({
-    palette <- c(brewer.pal(8, "Dark2"), "#80b1d3")
+    palette <- palette()
     clusters <- clusters()
     
-    theData <-
-      data.frame(selectedData(), cluster = factor(clusters$cluster))
+    theData <- data.frame(selectedData(), cluster = factor(clusters$cluster))
     
     clusterCenters <- as.data.frame(clusters$centers)
     
     plot_ly(theData, mode = "markers", type = "scatter",
-            colors = palette[1:input$clusters]) %>%
+            colors = palette) %>%
       add_trace(
         data = theData,
         x = as.formula(paste0("~", input$xcol)),
         y = as.formula(paste0("~", input$ycol)),
         text = ~ paste("Country: ", country),
         color = ~ cluster,
-        colors = palette[1:input$clusters]
+        colors = palette
       ) %>%
       add_trace(
         data = clusterCenters,

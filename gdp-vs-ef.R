@@ -101,7 +101,7 @@ gdpVsEF <- function (input, output, session) {
   })
   
   output$gdpViz <- renderPlotly({
-    colors <- c('#66c2a5','#fc8d62','#8da0cb','#e78ac3','#a6d854','#ffd92f')
+    #colors <- c('#66c2a5','#fc8d62','#8da0cb','#e78ac3','#a6d854','#ffd92f')
     
     
     if (input$yearMode == 'Time range') {
@@ -109,7 +109,7 @@ gdpVsEF <- function (input, output, session) {
       
       plot_ly(data, y = ~efPerc, x = ~gdpPerc, type = 'scatter', mode = 'markers',
               text = ~paste(country, '<br>Footprint change:', efPerc, '%<br>GDP change:', gdpPerc, '%<br>Population:', population.y), hoverinfo = 'text',
-              color = ~UN_region.y, colors = brewer.pal(6, "Dark2"),
+              color = ~UN_region.y, colors = categoricalDark2Colors8[1:6],
               marker = list(opacity = 0.8, size = 7)) %>%
         layout(title = "GDP vs Footprint", 
                yaxis = list(title = "Ecological Footprint change per Person in %", scaleanchor = "x", scaleratio = 1),
@@ -117,7 +117,7 @@ gdpVsEF <- function (input, output, session) {
         )
     } else {
       plot_ly(scatterYearData(), y = ~total, x = ~Percapita.GDP..2010.USD., type = 'scatter', mode = 'markers',
-              text = ~paste(country, '<br>Footprint:', total, '<br>GDP:', Percapita.GDP..2010.USD., '<br>Population: ', population), hoverinfo = 'text', colors = brewer.pal(6, "Dark2"),
+              text = ~paste(country, '<br>Footprint:', total, '<br>GDP:', Percapita.GDP..2010.USD., '<br>Population: ', population), hoverinfo = 'text', colors = categoricalDark2Colors8[1:6],
               color = ~UN_region, marker = list(opacity = 0.7, sizemode = 'diameter'), sizes = c(5, 25)) %>%
         layout(title = "GDP vs Footprint", yaxis = list(title = "Ecological Footprint per Person in GHA"),
                xaxis = list(title = "GDP per Person in USD")

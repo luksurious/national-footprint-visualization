@@ -96,10 +96,10 @@ deficitTrend <- function (input, output, session) {
         "footprint" = c("red", "#FF000050")
       )
     } else if (input$colors == 'Dark2') {
-      set2 <- brewer.pal(3, "Dark2")
+      
       list(
-        "bio" = c(set2[1], paste0(set2[1], "50")),
-        "footprint" = c(set2[3], paste0(set2[3], "50"))
+        "bio" = c(categoricalDark2Colors8[1], paste0(categoricalDark2Colors8[1], "50")),
+        "footprint" = c(categoricalDark2Colors8[3], paste0(categoricalDark2Colors8[3], "50"))
       )
     }
   })

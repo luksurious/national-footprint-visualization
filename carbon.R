@@ -19,8 +19,6 @@ element1 <- select(
   ISO.alpha.3.code
 )
 
-element1 <- element1[element1$record == "EFConsTotGHA",]
-
 element2 <- (element1 %>%
                group_by(ISO.alpha.3.code, country, year))
 
@@ -34,81 +32,87 @@ carbonEmissionsUI <- function (id) {
   
   tagList(sidebarLayout(
     sidebarPanel(
-      selectInput(
-        ns("region"),
-        label = "Choose the two objects to compare",
-        choices = list("Country and CO2 emission", "Continent and CO2 emission"),
-        selected = "Country and CO2 emission"
-      ),
       conditionalPanel(
-
-        condition = paste0("input['", ns("region"), "'] == 'Country and CO2 emission'"),
-
-        selectInput(
-          ns("countries1"),
-          "Country1",
-          choices = dataCountries,
-          selected = "China"
-        ),
-        selectInput(
-          ns("countries2"),
-          "Country2",
-          choices = dataCountries,
-
-          selected = "United States of America"
-
-        ),
+        condition = "input.carbonTabs == 'Comparison'",
         
-        fluidRow(column(
-          5,
-          radioButtons(
-            ns("colour"),
+        selectInput(
+          ns("region"),
+          label = "Choose the two objects to compare",
+          choices = list("Country and CO2 emission", "Continent and CO2 emission"),
+          selected = "Country and CO2 emission"
+        ),
+        conditionalPanel(
+          
+          condition = "input.region == 'Country and CO2 emission'",
+          ns = ns,
+          
+          selectInput(
+            ns("countries1"),
             "Country1",
-            choices = c("blue", "red", "green", "yellow"),
-            selected = 'blue'
-          )
-        ),
-        column(
-          5, radioButtons(
-            ns("colour1"),
+            choices = dataCountries,
+            selected = "China"
+          ),
+          selectInput(
+            ns("countries2"),
             "Country2",
-            choices = c("blue", "red", "green", "pink"),
-            selected = 'red'
-          )
-        ))
-      ),
-      conditionalPanel(
-
-        condition = paste0("input['", ns("region"), "'] == 'Continent and CO2 emission'"),
-
-        selectInput(
-          ns("continent1"),
-          "Continent1",
-          choices = dataRegions,
-          selected = "Asia"
+            choices = dataCountries,
+            
+            selected = "United States of America"
+            
+          ),
+          
+          fluidRow(column(
+            5,
+            radioButtons(
+              ns("colour"),
+              "Country1",
+              choices = c("blue", "red", "green", "yellow"),
+              selected = 'blue'
+            )
+          ),
+          column(
+            5, radioButtons(
+              ns("colour1"),
+              "Country2",
+              choices = c("blue", "red", "green", "pink"),
+              selected = 'red'
+            )
+          ))
         ),
-
-        selectInput(ns("continent2"), "Continent2", choices = dataRegions,selected = "North America"),
-        
-
-        fluidRow(column(
-          5,
-          radioButtons(
-            ns("colour1_1"),
+        conditionalPanel(
+          
+          condition = "input.region == 'Continent and CO2 emission'",
+          ns = ns,
+          
+          selectInput(
+            ns("continent1"),
             "Continent1",
-            choices = c("blue", "red", "green", "yellow"),
-            selected = 'blue'
-          )
-        ),
-        column(
-          5,
-          radioButtons(
-            ns("colour1_2"),
-            "Continent2",
-            choices = c("blue", "red", "green", "pink"),
-            selected = 'red'
-          )
-        ))
+            choices = dataRegions,
+            selected = "Asia"
+          ),
+          
+          selectInput(ns("continent2"), "Continent2", choices = dataRegions,selected = "North America"),
+          
+          
+          fluidRow(column(
+            5,
+            radioButtons(
+              ns("colour1_1"),
+              "Continent1",
+              choices = c("blue", "red", "green", "yellow"),
+              selected = 'blue'
+            )
+          ),
+          column(
+            5,
+            radioButtons(
+              ns("colour1_2"),
+              "Continent2",
+              choices = c("blue", "red", "green", "pink"),
+              selected = 'red'
+            )
+          ))
+        )
       ),
 
       sliderInput(
@@ -129,25 +133,26 @@ carbonEmissionsUI <- function (id) {
     mainPanel(
       tabsetPanel(
         type = "tabs",
+        id = "carbonTabs",
 
         tabPanel(
           'World CO2 emission map',
-          h3("How does change of CO2 emission in the world over years  ?"),
+          h3("How do CO2 emissions change in the world over the years?"),
           plotlyOutput(ns("map"))
         ),
         tabPanel(
           "Distribution",
-          h3("What is the trend of CO2 emission in different continents?"),
+          h3("What is the distribution of CO2 emissions in different continents?"),
           plotlyOutput(ns("plot_box"))
         ),
         tabPanel(
           'Evolution',
-          h3("What is the revolution of CO2 emission ?"),
+          h3("What is the evolution of CO2 emission ?"),
           plotlyOutput(ns("plot_stream"))
         ),
         tabPanel(
-          "Comparision",
-          h3("How changes of total CO2 emission in two selected countries?"),
+          "Comparison",
+          h3("How do total CO2 emissions change in selected countries?"),
           plotlyOutput(ns("plot_comparision"))
         )
 
@@ -333,27 +338,31 @@ carbonEmissions <- function (input, output, session) {
   
   output$map <- renderPlotly({
     data_map = Data2()
-    colorsdiverging <- list(
+    colors <- list(
       
-      list(0, "#fff5f0"),
-      list(0.125, "#fff5f0"),
-      list(0.1250000001, "#fee0d2"),
-      list(0.25, "#fee0d2"),
-      list(0.250000001, "#fcbba1"),
-      list(0.375, "#fcbba1"),
-      list(0.3750000001, "#fc9272"),
-      list(0.5, "#fc9272"),
-      list(0.50000001, "#fb6a4a"),
-      list(0.6250000000, "#fb6a4a"),
-      list(0.6250000001, "#ef3b2c"),
-      list(0.7500000000, "#ef3b2c"),
-      list(0.7500000001, "#cb181d"),
-      list(0.8250000000, "#cb181d"),
-      list(0.8250000001, "#99000d"),
-      list(1, "#99000d")
+      list(0, sequentialReds8[1]),
+      list(0.125, sequentialReds8[1]),
+      list(0.1250000001, sequentialReds8[2]),
+      list(0.25, sequentialReds8[2]),
+      list(0.250000001, sequentialReds8[3]),
+      list(0.375, sequentialReds8[3]),
+      list(0.3750000001, sequentialReds8[4]),
+      list(0.5, sequentialReds8[4]),
+      list(0.50000001, sequentialReds8[5]),
+      list(0.6250000000, sequentialReds8[5]),
+      list(0.6250000001, sequentialReds8[6]),
+      list(0.7500000000, sequentialReds8[6]),
+      list(0.7500000001, sequentialReds8[7]),
+      list(0.8750000000, sequentialReds8[7]),
+      list(0.8750000001, sequentialReds8[8]),
+      list(1, sequentialReds8[8])
       
     )
-
+    
+    #colormap <- sequentialColorscale(sequentialReds9)
+    
+    ticks <- c(0, as.numeric(matrix(unlist(colors), ncol = 2, byrow = TRUE)[c(FALSE, TRUE),1])) * max(data_map$carbon)
+    ticktext <- paste0(number_format(round(ticks, digits = 2), digits = 2), " GHA")
 
   
     # specify some map projection/options
@@ -363,7 +372,8 @@ carbonEmissions <- function (input, output, session) {
       showlakes = FALSE,
       
       showframe = FALSE,
-      showcoastlines = FALSE
+      showcoastlines = TRUE,
+      coastlinecolor = toRGB("grey")
     )
 
     l <- list(color = toRGB("grey"), width = 0.5)
@@ -373,12 +383,15 @@ carbonEmissions <- function (input, output, session) {
         z = ~ carbon,
         locations = ~ ISO.alpha.3.code,
         color = ~ carbon,
-        colorscale = colorsdiverging,
+        colorscale = colors,
         marker = list(line = l)
         
       ) %>%
 
-      colorbar(len = 1) %>%
+      colorbar(len = 1,
+               tickmode = "array",
+               tickvals = ticks,
+               ticktext = ticktext) %>%
       layout(
         title = sprintf(
           "Total Carbon Emissions from %g to %g",
