@@ -147,7 +147,7 @@ carbonEmissionsUI <- function (id) {
         tabPanel(
           "Distribution",
           h3(
-            "What is the distribution of CO2 emissions in different continents?"
+            "How do continents share of total CO2 emissions evolve?"
           ),
           plotlyOutput(ns("plot_box"))
         ),
