@@ -154,7 +154,7 @@ carbonEmissionsUI <- function (id) {
         tabPanel(
           'Evolution',
           h3("What is the evolution of CO2 emission ?"),
-          plotlyOutput(ns("plot_stream"))
+          plotlyOutput(ns("plot_area"))
         ),
         tabPanel(
           "Comparison",
@@ -286,7 +286,7 @@ carbonEmissions <- function (input, output, session) {
     p
     
   })
-  output$plot_stream <- renderPlotly({
+  output$plot_area <- renderPlotly({
     box1 = Data1()
     
     (
